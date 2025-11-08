@@ -1,5 +1,5 @@
-CSE327 Project <br/>
-Monopoly: Interactive Economics-Based Board Game <br/>
+**CSE327 Project** <br/>
+**Monopoly: Interactive Economics-Based Board Game** <br/>
 Group 9 <br/>
 Members: <br/>
 Shams Akbar Aalok 2232201642 <br/>
