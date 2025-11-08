@@ -1,4 +1,4 @@
-CSE327 Project
+CSE327 Project <br/>
 Monopoly: Interactive Economics-Based Board Game
 Group 9
 Members:
