@@ -1,0 +1,18 @@
+# Ignore sensitive database config
+Database/db_config.php
+
+# Ignore compiled C++ output
+*.exe
+*.out
+dice
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE/editor configs
+.vscode/
+.idea/
+
+# Ignore logs
+*.log
