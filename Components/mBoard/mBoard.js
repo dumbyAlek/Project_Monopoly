@@ -85,7 +85,7 @@ function movePlayer(playerObj) {
 // 7. Roll dice
 async function rollDice() {
   try {
-    const res = await fetch("rollDice.php");
+    const res = await fetch("../../Backend/mBoard/rollDice.php");
     const data = await res.json();
     const die1 = data.die1;
     const die2 = data.die2;
