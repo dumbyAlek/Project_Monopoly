@@ -82,6 +82,65 @@ function movePlayer(playerObj) {
   }
 }
 
+function getRandomPosition(diceEl, container) {
+  const containerRect = container.getBoundingClientRect();
+  const diceRect = diceEl.getBoundingClientRect();
+  
+  const maxX = containerRect.width - diceRect.width;
+  const maxY = containerRect.height - diceRect.height;
+  
+  return {
+    left: Math.random() * maxX,
+    top: Math.random() * maxY
+  };
+}
+
+const diceFaces = [
+  "../../Assets/dice1.png",
+  "../../Assets/dice2.png",
+  "../../Assets/dice3.png",
+  "../../Assets/dice4.png",
+  "../../Assets/dice5.png",
+  "../../Assets/dice6.png"
+];
+
+function animateDice(diceEl, face) {
+    const container = diceEl.parentElement;
+    if (!container) return; // safety check
+
+    // start position: top center
+    diceEl.style.top = "0px";
+    diceEl.style.left = `${(container.clientWidth/2 - 25)}px`;
+    diceEl.textContent = "🎲"; // initial throw emoji
+
+    // random scatter target within container bounds
+    const pos = getRandomPosition(diceEl, container);
+
+    // rotate randomly while "falling"
+    const rotations = Math.floor(Math.random() * 720) + 360;
+    diceEl.style.transform = `rotate(${rotations}deg)`;
+
+    // animate after a tiny delay to let DOM register
+    setTimeout(() => {
+        diceEl.style.top = `${pos.top}px`;
+        diceEl.style.left = `${pos.left}px`;
+    }, 50);
+
+    // after animation, show final face
+    setTimeout(() => {
+      diceEl.style.backgroundSize = "contain";
+      diceEl.style.backgroundRepeat = "no-repeat";
+      diceEl.style.backgroundPosition = "center";
+      diceEl.style.backgroundImage = `url(${face})`;
+      diceEl.textContent = "";
+    }, 800); // matches transition time
+
+    diceEl.innerHTML = `<img src="${face}" width="50" height="50" />`;
+
+}
+
+
+
 // 7. Roll dice
 async function rollDice() {
   try {
@@ -91,6 +150,8 @@ async function rollDice() {
     const die2 = data.die2;
     const total = die1 + die2;
 
+    animateDice(document.getElementById("dice1"), diceFaces[die1-1]);
+    animateDice(document.getElementById("dice2"), diceFaces[die2-1]);
     diceResult.textContent = `Player ${players[currentPlayerIndex].id} rolled ${die1} + ${die2} = ${total}`;
 
     let p = players[currentPlayerIndex];

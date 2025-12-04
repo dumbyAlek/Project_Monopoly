@@ -1,12 +1,24 @@
 body {
+<<<<<<< HEAD
     margin: 0;
     font-family: Arial, sans-serif;
     background: #f5f5f5!important;
+=======
+    margin: 0!important;
+    font-family: Arial, sans-serif!important;
+    display: flex!important;
+    flex-direction: column!important;
+    align-items: center!important;
+    background-color: rgb(255, 255, 255)!important;
+    overflow: hidden;
+
+>>>>>>> f976447dea32d40bec62c09078ca240f67a6119f
 }
 
 .game-container {
     display: flex;
     height: 100vh;
+    overflow: hidden;
 }
 
 .sidebar {
@@ -29,11 +41,15 @@ body {
     flex: 1;
     padding: 20px;
     box-sizing: border-box;
-    overflow: auto;
+    /* overflow: auto; */
 }
 
-/* This ensures your existing mBoard styles are contained */
-#monopoly-board {
+/* New block wrapper around imported component */
+.board-block {
+    background: #ffffff;       /* Page background */
+    padding: 15px;             /* Space around the imported board */
+    border-radius: 12px;       /* Rounded corners */
     width: 100%;
     height: 100%;
+    overflow: hidden;
 }

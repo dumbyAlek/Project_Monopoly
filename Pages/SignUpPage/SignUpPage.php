@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $ins->bind_param("ssii", $uname, $hash, $defaultMoney, $defaultPos);
             if ($ins->execute()) {
                 $_SESSION['username'] = $uname;
-                header('Location: ../GamePage/gamepage.php');
+                header('Location: ../HomePage/HomePage.php');
                 exit;
             } else {
                 $message = "Error creating account.";

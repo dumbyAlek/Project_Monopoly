@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once __DIR__ . '/../../Database/db_config.php'; // Your DB connection
+require_once __DIR__ . '/../../Database/db_config.php'; 
 
 $message = '';
 

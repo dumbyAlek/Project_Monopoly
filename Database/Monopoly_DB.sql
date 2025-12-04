@@ -1,7 +1,3 @@
--- ==========================
--- Monopoly Database Script
--- ==========================
-
 -- 1. Create database
 CREATE DATABASE IF NOT EXISTS Monopoly;
 USE Monopoly;

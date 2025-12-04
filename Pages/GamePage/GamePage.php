@@ -1,5 +1,5 @@
 <?php
-    // Placeholder for PHP logic (load players, bank, etc.)
+    // PHP logic for players/bank goes here
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -25,8 +25,7 @@
         </div>
 
         <div class="board-container">
-            <h2>Monopoly Board</h2>
-            <div id="monopoly-board">
+            <div class="board-block">
                 <?php include "../../Components/mBoard/mBoard.php"; ?>
             </div>
         </div>
