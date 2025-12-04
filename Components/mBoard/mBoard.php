@@ -18,8 +18,8 @@
 
     <!-- Dice Container (center panel) -->
     <div class="dice-container dice-area">
-      
-      <h3>🎲</h3>
+      <div class="dice" id="dice1">🎲</div>
+      <div class="dice" id="dice2">🎲</div>
       <button id="rollBtn">Roll Dice</button>
       <p id="diceResult"></p>
     </div>

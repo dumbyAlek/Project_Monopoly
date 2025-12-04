@@ -145,6 +145,25 @@
   position: relative;
 }
 
+.dice-container .dice {
+    position: absolute;
+    width: 45px;
+    height: 45px;
+    background: white;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 45px;
+    top: 10px; /* start above container */
+    left: 12%;
+    transform: translateX(-50%) rotate(0deg);
+    z-index: 3;
+    font-size: 35px;
+    transition: top 1s ease-out, left 1s ease-out, transform 1s ease-out;
+}
+
+
 /* Pseudo-element for semi-transparent background */
 .dice-container::before {
   content: '';
@@ -189,13 +208,8 @@ button:hover {
   position: absolute;
 }
 
-.dice-container h3 {
-    position: absolute;
-    top: 10px;   /* distance from top */
-    left: 10px;  /* distance from left */
-    margin: 0;   /* remove default margin */
-    text-align: left; /* optional */
-    z-index: 2;  /* above the pseudo-element background */
-    font-size: 30px;
-    font-weight: bold;
+.dice-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
