@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if (password_verify($form_pass, $hash)) {
                 $_SESSION['username'] = $form_user;
-                header('Location: ../GamePage/gamepage.php');
+                header('Location: ../GamePage/GamePage.php');
                 exit;
             } else {
                 $message = "Incorrect password.";
