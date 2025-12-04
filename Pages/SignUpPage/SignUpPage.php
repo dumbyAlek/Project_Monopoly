@@ -1,7 +1,6 @@
 <?php
-// SignUpPage.php
 session_start();
-require_once __DIR__ . '/../../Database/db_connect.php'; // includes db_config.php and $con
+require_once __DIR__ . '/../../Database/db_connect.php';
 
 $message = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -12,7 +11,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($uname === '' || $pwd === '' || $pwd !== $pwd2) {
         $message = "Fill fields and ensure passwords match.";
     } else {
-        // check existence
         $stmt = $con->prepare("SELECT player_id FROM Player WHERE username = ?");
         $stmt->bind_param("s", $uname);
         $stmt->execute();
@@ -22,9 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->close();
         } else {
             $stmt->close();
-            // Hash password using PHP's password_hash (bcrypt by default)
             $hash = password_hash($pwd, PASSWORD_BCRYPT);
-            // Insert: set defaults for money/position etc. Adjust columns per your Player schema.
             $ins = $con->prepare("INSERT INTO Player (username, password, money, position) VALUES (?, ?, ?, ?)");
             $defaultMoney = 1500; $defaultPos = 0;
             $ins->bind_param("ssii", $uname, $hash, $defaultMoney, $defaultPos);
@@ -40,19 +36,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
-<!doctype html>
-<html>
-<head><meta charset="utf-8"><title>Sign Up</title></head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign Up</title>
+<style>
+    body {
+        margin: 0; padding: 0; height: 100vh;
+        display: flex; justify-content: center; align-items: center;
+        background: url("../../Assets/bg.jpg") no-repeat center center/cover;
+        font-family: Arial, sans-serif;
+    }
+    .container {
+        text-align: center;
+        background: rgba(100, 177, 255, 0.54);
+        padding: 40px 60px;
+        border-radius: 20px;
+        backdrop-filter: blur(3px);
+    }
+    h3 { margin-bottom: 20px; color: #fff; }
+    input {
+        width: 100%; padding: 12px; margin: 10px 0;
+        border-radius: 10px; border: none; font-size: 16px;
+    }
+    button {
+        width: 100%; padding: 12px; margin-top: 15px;
+        font-size: 18px; border: none; border-radius: 10px;
+        background: #4caf50; color: white; cursor: pointer;
+        transition: 0.2s ease;
+    }
+    button:hover { opacity: 0.8; color: rgba(207, 47, 236, 1); }
+    .message { color: red; margin-bottom: 10px; }
+</style>
+</head>
 <body>
-  <div style="width:360px;margin:40px auto;padding:20px;border:1px solid #eee;">
-    <h3>Sign Up</h3>
-    <?php if ($message) echo "<div style='color:red;'>".htmlspecialchars($message)."</div>"; ?>
-    <form method="post" action="">
-      <input name="username" placeholder="Username" required style="width:100%;padding:8px;margin:8px 0;"><br>
-      <input name="password" type="password" placeholder="Password" required style="width:100%;padding:8px;margin:8px 0;"><br>
-      <input name="password_confirm" type="password" placeholder="Confirm Password" required style="width:100%;padding:8px;margin:8px 0;"><br>
-      <button type="submit">Create account</button>
-    </form>
-  </div>
+    <div class="container">
+        <h3>Sign Up</h3>
+        <?php if ($message) echo "<div class='message'>".htmlspecialchars($message)."</div>"; ?>
+        <form method="post">
+            <input name="username" placeholder="Username" required>
+            <input name="password" type="password" placeholder="Password" required>
+            <input name="password_confirm" type="password" placeholder="Confirm Password" required>
+            <button type="submit">Create account</button>
+        </form>
+    </div>
 </body>
 </html>

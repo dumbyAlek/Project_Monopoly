@@ -1,14 +1,19 @@
-CREATE DATABASE IF NOT EXISTS monopoly;
-USE monopoly;
+-- ==========================
+-- Monopoly Database Script
+-- ==========================
 
--- 1. ADMIN
+-- 1. Create database
+CREATE DATABASE IF NOT EXISTS Monopoly;
+USE Monopoly;
+
+-- 2. ADMIN
 CREATE TABLE IF NOT EXISTS Admin (
     admin_id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL
 );
 
--- 2. BANK
+-- 3. BANK
 CREATE TABLE IF NOT EXISTS Bank (
     bank_id INT AUTO_INCREMENT PRIMARY KEY,
     total_funds BIGINT NOT NULL,
@@ -17,7 +22,7 @@ CREATE TABLE IF NOT EXISTS Bank (
     backup_status VARCHAR(50)
 );
 
--- 3. GAME
+-- 4. GAME
 CREATE TABLE IF NOT EXISTS Game (
     game_id INT AUTO_INCREMENT PRIMARY KEY,
     start_time DATETIME NOT NULL,
@@ -27,9 +32,9 @@ CREATE TABLE IF NOT EXISTS Game (
     save_file_path VARCHAR(255)
 );
 
--- 4. PLAYER
+-- 5. PLAYER
 CREATE TABLE IF NOT EXISTS Player (
-    player_id INT PRIMARY KEY,
+    player_id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(100) NOT NULL,
     password VARCHAR(255) NOT NULL,
     money INT NOT NULL,
@@ -40,7 +45,7 @@ CREATE TABLE IF NOT EXISTS Player (
     FOREIGN KEY (current_game_id) REFERENCES Game(game_id)
 );
 
--- 5. WALLET (1–1 with Player)
+-- 6. WALLET (1–1 with Player)
 CREATE TABLE IF NOT EXISTS Wallet (
     player_id INT PRIMARY KEY,
     propertyWorthCash INT DEFAULT 0,
@@ -50,7 +55,7 @@ CREATE TABLE IF NOT EXISTS Wallet (
     FOREIGN KEY (player_id) REFERENCES Player(player_id)
 );
 
--- 6. PROPERTY
+-- 7. PROPERTY
 CREATE TABLE IF NOT EXISTS Property (
     property_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -62,7 +67,7 @@ CREATE TABLE IF NOT EXISTS Property (
     FOREIGN KEY (owner_id) REFERENCES Player(player_id)
 );
 
--- 7. BANK TRANSACTIONS
+-- 8. BANK TRANSACTIONS
 CREATE TABLE IF NOT EXISTS BankTransaction (
     transaction_id INT AUTO_INCREMENT PRIMARY KEY,
     bank_id INT DEFAULT 1,
@@ -76,7 +81,7 @@ CREATE TABLE IF NOT EXISTS BankTransaction (
     FOREIGN KEY (property_id) REFERENCES Property(property_id)
 );
 
--- 8. PERSONAL TRANSACTIONS
+-- 9. PERSONAL TRANSACTIONS
 CREATE TABLE IF NOT EXISTS PersonalTransaction (
     transaction_id INT AUTO_INCREMENT PRIMARY KEY,
     from_player_id INT NOT NULL,
@@ -88,7 +93,7 @@ CREATE TABLE IF NOT EXISTS PersonalTransaction (
     FOREIGN KEY (to_player_id) REFERENCES Player(player_id)
 );
 
--- 9. BOARD TILE
+-- 10. BOARD TILE
 CREATE TABLE IF NOT EXISTS BoardTile (
     tile_id INT AUTO_INCREMENT PRIMARY KEY,
     type ENUM('property','chance','community','jail','go','tax','free_parking','go_to_jail') NOT NULL,
@@ -98,7 +103,7 @@ CREATE TABLE IF NOT EXISTS BoardTile (
     FOREIGN KEY (property_id) REFERENCES Property(property_id)
 );
 
--- 10. CARD
+-- 11. CARD
 CREATE TABLE IF NOT EXISTS Card (
     card_id INT AUTO_INCREMENT PRIMARY KEY,
     type ENUM('Chance','Community Chest') NOT NULL,
@@ -107,13 +112,13 @@ CREATE TABLE IF NOT EXISTS Card (
     value INT
 );
 
--- 11. DICE
+-- 12. DICE
 CREATE TABLE IF NOT EXISTS Dice (
     dice_id INT AUTO_INCREMENT PRIMARY KEY,
     value INT NOT NULL
 );
 
--- 12. LOG
+-- 13. LOG
 CREATE TABLE IF NOT EXISTS Log (
     log_id INT AUTO_INCREMENT PRIMARY KEY,
     game_id INT NOT NULL,
@@ -122,7 +127,7 @@ CREATE TABLE IF NOT EXISTS Log (
     FOREIGN KEY (game_id) REFERENCES Game(game_id)
 );
 
--- 13. BACKUP
+-- 14. BACKUP
 CREATE TABLE IF NOT EXISTS Backup (
     backup_id INT AUTO_INCREMENT PRIMARY KEY,
     file_path VARCHAR(255) NOT NULL,
@@ -131,7 +136,7 @@ CREATE TABLE IF NOT EXISTS Backup (
     FOREIGN KEY (created_by) REFERENCES Admin(admin_id)
 );
 
--- 14. SAVE FILE
+-- 15. SAVE FILE
 CREATE TABLE IF NOT EXISTS SaveFile (
     save_id INT AUTO_INCREMENT PRIMARY KEY,
     game_id INT NOT NULL,
@@ -142,7 +147,7 @@ CREATE TABLE IF NOT EXISTS SaveFile (
     FOREIGN KEY (player_id) REFERENCES Player(player_id)
 );
 
--- 15. MAP
+-- 16. MAP
 CREATE TABLE IF NOT EXISTS Map (
     map_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -150,12 +155,12 @@ CREATE TABLE IF NOT EXISTS Map (
     num_tiles INT
 );
 
--- Missing Foreign Key (BoardTile → Map)
+-- Add foreign key: BoardTile → Map
 ALTER TABLE BoardTile
     ADD CONSTRAINT fk_boardtile_map
     FOREIGN KEY (map_id) REFERENCES Map(map_id);
 
--- 16. SETTINGS (1–1 with Game)
+-- 17. SETTINGS (1–1 with Game)
 CREATE TABLE IF NOT EXISTS Settings (
     settings_id INT AUTO_INCREMENT PRIMARY KEY,
     game_id INT NOT NULL UNIQUE,
