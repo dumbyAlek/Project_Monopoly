@@ -15,9 +15,11 @@
 
   <!-- Monopoly Board Container -->
   <div class="board" id="board">
+
     <!-- Dice Container (center panel) -->
     <div class="dice-container dice-area">
-      <h3>🎲 Dice Roll</h3>
+      
+      <h3>🎲</h3>
       <button id="rollBtn">Roll Dice</button>
       <p id="diceResult"></p>
     </div>

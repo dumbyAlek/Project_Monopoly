@@ -1,15 +1,8 @@
 /* tiles.css */
-body {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-color: #f3f3f3;
-  font-family: sans-serif;
-}
 
 .tile {
   border: 0.5px solid #000000;
-  background-color: rgb(108, 217, 164);
+  background-color: rgb(122, 184, 235);
   display: flex;
   width: 80px;
   height: 80px;
@@ -131,14 +124,14 @@ body {
 .dice-container {
   grid-column: 2 / 11;
   grid-row: 2 / 11;
+  aspect-ratio: 3 / 2;
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 250px;
-  height: 250px;
-  background-color: #ffffffdd;
-  border: 2px solid #333;
+  background: none;
+  border: 2px solid #656565;
   border-radius: 10px;
   display: flex;
   flex-direction: column;
@@ -149,16 +142,60 @@ body {
   text-align: center;
   font-family: sans-serif;
   box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  position: relative;
+}
+
+/* Pseudo-element for semi-transparent background */
+.dice-container::before {
+  content: '';
+  position: absolute;
+  inset: 0; /* top:0; bottom:0; left:0; right:0 */
+  background: url('../../Assets/Logo.png') center/cover no-repeat;
+  opacity: 0.2; /* light opacity */
+  border-radius: 10px;
+  z-index: 0; /* behind content */
+}
+
+/* Ensure content is above background */
+.dice-container > * {
+  position: relative;
+  z-index: 1;
 }
 
 .dice-container button {
   margin-top: 5px;
   padding: 5px 10px;
-  font-size: 14px;
+  background-color: rgba(197, 197, 255, 0.92);
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: bold;
   cursor: pointer;
+  top: 200px;   
+  left: 90px;
+  position: absolute;
+}
+
+button:hover {
+  opacity: 0.8;
+  color: rgb(72, 0, 255);
 }
 
 .dice-container p {
   margin: 5px 0 0 0;
   font-weight: bold;
+  color: rgb(0, 0, 0);
+  top: 160px;   
+  left: 45px;
+  position: absolute;
+}
+
+.dice-container h3 {
+    position: absolute;
+    top: 10px;   /* distance from top */
+    left: 10px;  /* distance from left */
+    margin: 0;   /* remove default margin */
+    text-align: left; /* optional */
+    z-index: 2;  /* above the pseudo-element background */
+    font-size: 30px;
+    font-weight: bold;
 }
