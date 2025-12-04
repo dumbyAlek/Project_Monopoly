@@ -1,12 +1,15 @@
-<!-- mBoard.html  -->
+<!-- mBoard.php  -->
+<?php
+    // Placeholder for PHP logic (load players, bank, etc.)
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Monopoly Board</title>
-    <link rel="stylesheet" href="tiles.css">
-  <link rel="stylesheet" href="mBoard.css">
+    <link rel="stylesheet" href="../../Components/mBoard/tiles.css">
+  <link rel="stylesheet" href="../../Components/mBoard/mBoard.css">
 </head>
 <body>
 
@@ -26,7 +29,7 @@
 
   <!-- Main Logic -->
   <script type="module"
-  src="mBoard.js"></script>
+  src="../../Components/mBoard/mBoard.js"></script>
 
 </body>
 </html>
