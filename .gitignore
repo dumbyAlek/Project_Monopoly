@@ -1,0 +1,39 @@
+# ---------------------------------
+# 1. IDE & OS Generated Files
+# ---------------------------------
+# macOS/Linux System Files
+.DS_Store
+.vscode/  # Visual Studio Code settings
+.idea/    # JetBrains IDEs (PHPStorm, IntelliJ)
+*.swp     # Vim temporary files
+*~        # Temporary files
+.Identifier # png file opening temp 
+
+# ---------------------------------
+# 2. PHP / Composer
+# ---------------------------------
+/vendor/             # Composer dependency directory
+composer.lock        # Usually committed, but sometimes ignored in small projects
+.env                 # Environment variable files (contains sensitive data)
+.user.ini
+
+# ---------------------------------
+# 3. Database & Logs
+# ---------------------------------
+# Sensitive database config files (if not using .env)
+# These should be ignored if they contain actual passwords/credentials
+/Database/db_config.php
+/Backend/mBoard/dice
+/Backend/Session_Management/auth_exec
+
+# Log files
+*.log
+/logs/
+*.sql             # Generated database dumps (if created by the app)
+
+# ---------------------------------
+# 4. Compiled & Cache
+# ---------------------------------
+/cache/
+/tmp/
+/public/build/    # Compiled assets (like Webpack or Vite output)
