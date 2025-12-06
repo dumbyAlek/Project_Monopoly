@@ -1,8 +1,11 @@
 <?php
 session_start();
-require_once __DIR__ . '/../../Database/db_config.php'; 
+require_once __DIR__ . '/../../Database/Database.php';
 
 $message = '';
+
+$db = Database::getInstance();
+$con = $db->getConnection();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $form_user = trim($_POST['username'] ?? '');
@@ -11,7 +14,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($form_user === '' || $form_pass === '') {
         $message = 'Enter username and password.';
     } else {
-        // Prepare statement
         $stmt = $con->prepare("SELECT password FROM Player WHERE username = ?");
         $stmt->bind_param("s", $form_user);
         $stmt->execute();

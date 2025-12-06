@@ -1,37 +1,81 @@
 <?php
 session_start();
-require_once __DIR__ . '/../../Database/db_connect.php';
+require_once __DIR__ . '/../../Database/Database.php'; // <-- singleton
+
+use function htmlspecialchars;
 
 $message = '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $uname = trim($_POST['username'] ?? '');
     $pwd = trim($_POST['password'] ?? '');
     $pwd2 = trim($_POST['password_confirm'] ?? '');
 
+    // Basic validations
     if ($uname === '' || $pwd === '' || $pwd !== $pwd2) {
         $message = "Fill fields and ensure passwords match.";
+    } elseif (strlen($uname) > 100 || strlen($pwd) > 256) {
+        // limit lengths to avoid very large values
+        $message = "Input too long.";
     } else {
+        // Get the singleton DB connection
+        $db   = Database::getInstance();
+        $con  = $db->getConnection();
+
+        // Check username availability using a prepared statement
         $stmt = $con->prepare("SELECT player_id FROM Player WHERE username = ?");
-        $stmt->bind_param("s", $uname);
-        $stmt->execute();
-        $stmt->store_result();
-        if ($stmt->num_rows > 0) {
-            $message = "Username already exists.";
-            $stmt->close();
+        if ($stmt === false) {
+            error_log('Prepare failed (select username): ' . $con->error);
+            $message = "An error occurred. Try again later.";
         } else {
-            $stmt->close();
-            $hash = password_hash($pwd, PASSWORD_BCRYPT);
-            $ins = $con->prepare("INSERT INTO Player (username, password, money, position) VALUES (?, ?, ?, ?)");
-            $defaultMoney = 1500; $defaultPos = 0;
-            $ins->bind_param("ssii", $uname, $hash, $defaultMoney, $defaultPos);
-            if ($ins->execute()) {
-                $_SESSION['username'] = $uname;
-                header('Location: ../HomePage/HomePage.php');
-                exit;
+            $stmt->bind_param("s", $uname);
+            if (!$stmt->execute()) {
+                error_log('Execute failed (select username): ' . $stmt->error);
+                $message = "An error occurred. Try again later.";
+                $stmt->close();
             } else {
-                $message = "Error creating account.";
+                $stmt->store_result();
+                if ($stmt->num_rows > 0) {
+                    $message = "Username already exists.";
+                    $stmt->close();
+                } else {
+                    $stmt->close();
+
+                    // Hash the password using PHP default (currently bcrypt or better)
+                    $hash = password_hash($pwd, PASSWORD_DEFAULT);
+                    if ($hash === false) {
+                        error_log('password_hash failed for user: ' . $uname);
+                        $message = "An error occurred. Try again later.";
+                    } else {
+                        // Insert new player
+                        $ins = $con->prepare("INSERT INTO Player (username, password, money, position) VALUES (?, ?, ?, ?)");
+                        if ($ins === false) {
+                            error_log('Prepare failed (insert player): ' . $con->error);
+                            $message = "An error occurred. Try again later.";
+                        } else {
+                            $defaultMoney = 1500;
+                            $defaultPos = 0;
+                            $ins->bind_param("ssii", $uname, $hash, $defaultMoney, $defaultPos);
+                            if ($ins->execute()) {
+                                // Success: log user in
+                                $_SESSION['username'] = $uname;
+                                $ins->close();
+                                header('Location: ../HomePage/HomePage.php');
+                                exit;
+                            } else {
+                                // If duplicate username slipped in due to race, handle gracefully
+                                if ($con->errno === 1062) { // duplicate entry error code in MySQL
+                                    $message = "Username already exists.";
+                                } else {
+                                    error_log('Insert failed: ' . $ins->error);
+                                    $message = "Error creating account.";
+                                }
+                                $ins->close();
+                            }
+                        }
+                    }
+                }
             }
-            $ins->close();
         }
     }
 }
@@ -39,8 +83,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Sign Up</title>
 <style>
     body {
@@ -74,11 +118,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
     <div class="container">
         <h3>Sign Up</h3>
-        <?php if ($message) echo "<div class='message'>".htmlspecialchars($message)."</div>"; ?>
-        <form method="post">
-            <input name="username" placeholder="Username" required>
-            <input name="password" type="password" placeholder="Password" required>
-            <input name="password_confirm" type="password" placeholder="Confirm Password" required>
+        <?php if ($message): ?>
+            <div class="message"><?= htmlspecialchars($message) ?></div>
+        <?php endif; ?>
+        <form method="post" autocomplete="off">
+            <input name="username" placeholder="Username" required maxlength="100">
+            <input name="password" type="password" placeholder="Password" required maxlength="256" autocomplete="new-password">
+            <input name="password_confirm" type="password" placeholder="Confirm Password" required maxlength="256" autocomplete="new-password">
             <button type="submit">Create account</button>
         </form>
     </div>
