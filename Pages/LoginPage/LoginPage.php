@@ -45,35 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login</title>
-<style>
-    body {
-        margin: 0; padding: 0; height: 100vh;
-        display: flex; justify-content: center; align-items: center;
-        background: url("../../Assets/bg.jpg") no-repeat center center/cover;
-        font-family: Arial, sans-serif;
-    }
-    .container {
-        text-align: center;
-        background: rgba(100, 177, 255, 0.54);
-        padding: 40px 60px;
-        border-radius: 20px;
-        backdrop-filter: blur(3px);
-    }
-    h3 { margin-bottom: 20px; color: #fff; }
-    input {
-        width: 100%; padding: 12px; margin: 10px 0;
-        border-radius: 10px; border: none; font-size: 16px;
-    }
-    button {
-        width: 100%; padding: 12px; margin-top: 15px;
-        font-size: 18px; border: none; border-radius: 10px;
-        background: #ffffff; cursor: pointer;
-        transition: 0.2s ease;
-    }
-    button:hover { opacity: 0.8; color: rgba(207, 47, 236, 1); }
-    .message { color: red; margin-bottom: 10px; }
-    a { color: #fff; text-decoration: underline; }
-</style>
+<link rel="stylesheet" href="../../../Assets/css/style.css">
 </head>
 <body>
     <div class="container">
@@ -82,9 +54,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <form method="post">
             <input name="username" placeholder="Username" required>
             <input name="password" type="password" placeholder="Password" required>
-            <button type="submit">Login</button>
+            <button type="submit" class="primary">Login</button>
         </form>
-        <p><a href="../SignUpPage/SignUpPage.php">Not registered? Sign up</a></p>
+        <a class="login-link" href="../SignUpPage/SignUpPage.php">Not registered? Sign up</a>
     </div>
 </body>
 </html>

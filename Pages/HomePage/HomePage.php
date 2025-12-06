@@ -59,10 +59,9 @@ if ($player_id !== null) {
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Home - Monopoly</title>
-<link rel="stylesheet" href="HomePage.css">
+<link rel="stylesheet" href="../../../Assets/css/style.css">
 </head>
 <body>
-  <div class="wrap">
     <div class="panel main">
       <h1>Welcome, <?= htmlspecialchars($username) ?>!</h1>
       <p class="subtitle">Ready to play Monopoly? Choose an action below.</p>
@@ -97,7 +96,6 @@ if ($player_id !== null) {
         <div class="small">Tip: you can resume the last save or browse all saves. Use settings to change board theme and dice type.</div>
       </footer>
     </div>
-  </div>
 
   <!-- Logout modal -->
   <div id="logoutModal" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
@@ -110,5 +108,6 @@ if ($player_id !== null) {
       </div>
     </div>
   </div>
+<script src="HomePage.js"></script>
 </body>
 </html>
