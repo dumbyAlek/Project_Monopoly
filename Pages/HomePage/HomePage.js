@@ -2,16 +2,6 @@ function goToGame() {
   window.location.href = "../GamePage/GamePage.php";
 }
 
-// Start button UX (keeps the previous confirm behaviour)
-document.getElementById("startBtn").addEventListener("click", function (e) {
-  if (!confirm("Start a new game? This will create a new game session.")) {
-    e.preventDefault();
-  } else {
-    this.disabled = true;
-    this.textContent = "Starting...";
-  }
-});
-
 // Modal logic for logout
 (function () {
   const logoutForm = document.getElementById("logoutForm");

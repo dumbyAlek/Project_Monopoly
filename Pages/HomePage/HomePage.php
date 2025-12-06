@@ -84,7 +84,7 @@ if ($player_id !== null) {
         <?php endif; ?>
 
         <a class="btn ghost" href="../SavedGames/SavedGames.php">Browse Saved Games</a>
-        <a class="btn ghost" href="../Settings/Settings.php">Settings</a>
+        <a class="btn ghost" href="../SettingsPage/SettingsPage.php">Settings</a>
 
         <!-- Logout: we intercept this submit and show a modal -->
         <form id="logoutForm" method="post" action="../LoginPage/LoginPage.php" style="margin:0;">

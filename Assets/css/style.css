@@ -1,219 +1,269 @@
-/* =======================================
-   Global & Body Styles
-======================================= */
-:root {
-    --card-bg: rgba(100, 177, 255, 0.54);
-    --accent: #4caf50;
-    --danger: #f44336;
-}
+    /* =======================================
+    Global & Body Styles
+    ======================================= */
+    :root {
+        --card-bg: rgba(100, 177, 255, 0.54);
+        --accent: #4caf50;
+        --danger: #f44336;
+    }
 
-html{
-    height: 100vh;
-    margin: 0;
-    padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
+    html {
+        height: 100vh;
+        margin: 0;
+        padding: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-body{
-    background: url("../../Assets/bg.jpg") no-repeat center center/cover;
-    display: flex;
-    align-items: center;
-    height: 100vh;
-    justify-content: center;
-}
+    body {
+        background: url("../../Assets/bg.jpg") no-repeat center center/cover;
+        display: flex;
+        align-items: center;
+        height: 100vh;
+        justify-content: center;
+    }
 
-/* =======================================
-   Container / Panel Styles
-======================================= */
-.container,
-.wrap,
-.panel {
-    background: rgba(255, 255, 255, 0.15);
-    padding: 30px 40px;
-    border-radius: 20px;
-    backdrop-filter: blur(12px);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
-    color: #fff;
-}
+    /* =======================================
+    Container / Panel Styles
+    ======================================= */
+    .container,
+    .wrap,
+    .panel {
+        background: rgba(114, 134, 96, 0.55);
+        padding: 30px 40px;
+        border-radius: 20px;
+        backdrop-filter: blur(12px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+        color: #fff;
+    }
 
-.container {
-    width: 360px;
-    text-align: center;
-}
+    .container {
+        width: 360px;
+        text-align: center;
+    }
 
-.panel {
-    padding: 26px;
-}
+    .panel {
+        padding: 26px;
+    }
 
-/* =======================================
-   Headings
-======================================= */
-h1, h3 {
-    margin: 0 0 10px 0;
-    font-size: 28px;
-}
+    /* =======================================
+    Headings
+    ======================================= */
+    h1,
+    h3 {
+        margin: 0 0 10px 0;
+        font-size: 28px;
+    }
 
-h3 { margin-bottom: 25px; }
+    h3 {
+        margin-bottom: 25px;
+    }
 
-/* =======================================
-   Subtitles & Meta Text
-======================================= */
-.subtitle {
-    margin: 0 0 18px 0;
-    opacity: 0.95;
-}
+    /* =======================================
+    Subtitles & Meta Text
+    ======================================= */
+    .subtitle {
+        margin: 0 0 18px 0;
+        opacity: 0.95;
+    }
 
-.meta {
-    color: rgba(255, 255, 255, 0.9);
-    margin-top: 8px;
-    font-size: 14px;
-}
+    .meta {
+        color: rgba(255, 255, 255, 0.9);
+        margin-top: 8px;
+        font-size: 14px;
+    }
 
-.small {
-    font-size: 13px;
-    opacity: 0.9;
-}
+    .small {
+        font-size: 13px;
+        opacity: 0.9;
+    }
 
-/* =======================================
-   Forms & Inputs
-======================================= */
-input {
-    width: 100%;
-    padding: 12px 14px;
-    margin: 10px 0;
-    border-radius: 12px;
-    border: none;
-    font-size: 16px;
-    background: rgba(255,255,255,0.25);
-    color: #fff;
-    outline: none;
-    transition: 0.3s;
-}
+    /* =======================================
+    Forms & Inputs
+    ======================================= */
+    input {
+        width: 100%;
+        padding: 12px 14px;
+        margin: 10px 0;
+        border-radius: 12px;
+        border: none;
+        font-size: 16px;
+        background: rgba(255, 255, 255, 0.25);
+        color: #fff;
+        outline: none;
+        transition: 0.3s;
+    }
 
-input::placeholder { color: rgba(255,255,255,0.7); }
+    input::placeholder {
+        color: rgba(255, 255, 255, 0.7);
+    }
 
-input:focus { background: rgba(255,255,255,0.4); }
+    input:focus {
+        background: rgba(255, 255, 255, 0.4);
+    }
 
-/* =======================================
-   Buttons
-======================================= */
-button,
-.btn {
-    display: inline-block;
-    padding: 12px 16px;
-    border-radius: 12px;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    text-align: center;
-    transition: 0.3s;
-}
+    /* =======================================
+    Buttons
+    ======================================= */
+    button,
+    .btn {
+        display: inline-block;
+        padding: 12px 16px;
+        border-radius: 12px;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+        text-align: center;
+        transition: 0.3s;
+    }
 
-button:hover,
-.btn:hover {
-    transform: translateY(-1px);
-}
+    button:hover,
+    .btn:hover {
+        transform: translateY(-1px);
+    }
 
-/* Variants */
-.btn.primary,
-button.primary { background: var(--accent); color: #fff; }
-.btn.ghost,
-button.ghost {
-    background: transparent;
-    border: 1px solid rgba(255,255,255,0.18);
-    color: #fff;
-}
-.btn.danger,
-button.danger { background: var(--danger); color: #fff; }
+    /* Variants */
+    .btn.primary,
+    button.primary {
+        background: var(--accent);
+        color: #fff;
+        width: 100%;
+    }
 
-/* Special for HomePage start button */
-.start-btn { background: #4c8bf5; color: #fff; font-size: 20px; padding: 15px 30px; }
-.start-btn:hover { opacity: 0.85; }
+    .btn.ghost,
+    button.ghost {
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.58);
+        color: #fff;
+    }
 
-/* Login/Signup link button */
-.login-link {
-    margin-top: 12px;
-    display: inline-block;
-    padding: 10px 15px;
-    border-radius: 10px;
-    border: 1px solid #fff;
-    color: #fff;
-    text-decoration: none;
-    font-weight: bold;
-}
-.login-link:hover { background: rgba(255,255,255,0.2); }
+    .btn.danger,
+    button.danger {
+        background: var(--danger);
+        color: #fff;
+    }
 
-/* =======================================
-   Actions Container
-======================================= */
-.actions {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 12px;
-}
+    /* Special for HomePage start button */
+    .start-btn {
+        background: #4c8bf5;
+        color: #fff;
+        font-size: 20px;
+        padding: 15px 30px;
+    }
 
-/* =======================================
-   Card Styles
-======================================= */
-.card {
-    padding: 14px;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.06);
-    color: #fff;
-}
+    .start-btn:hover {
+        opacity: 0.85;
+    }
 
-/* =======================================
-   Navigation Links
-======================================= */
-nav a {
-    color: #fff;
-    text-decoration: none;
-    display: block;
-    margin-bottom: 8px;
-}
+    /* Login/Signup link button */
+    .login-link {
+        margin-top: 12px;
+        display: inline-block;
+        padding: 10px 15px;
+        border-radius: 10px;
+        border: 1px solid #fff;
+        color: #fff;
+        text-decoration: none;
+        font-weight: bold;
+    }
 
-/* =======================================
-   Footer
-======================================= */
-footer {
-    margin-top: 18px;
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.8);
-}
+    .login-link:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
 
-/* =======================================
-   Modal Styles (for logout etc)
-======================================= */
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.45);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 1200;
-}
+    /* =======================================
+    Actions Container
+    ======================================= */
+    .actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 12px;
+    }
 
-.modal {
-    background: #fff;
-    color: #222;
-    border-radius: 12px;
-    padding: 20px;
-    width: 92%;
-    max-width: 420px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-}
+    /* =======================================
+    Card Styles
+    ======================================= */
+    .card {
+        padding: 14px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.06);
+        color: #fff;
+    }
 
-.modal h3 { margin: 0 0 8px 0; }
-.modal p { margin: 0 0 16px 0; color: #444; }
-.modal .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
-.modal .modal-actions .btn { padding: 10px 14px; border-radius: 8px; font-size: 14px; }
+    /* =======================================
+    Navigation Links
+    ======================================= */
+    nav a {
+        color: #fff;
+        text-decoration: none;
+        display: block;
+        margin-bottom: 8px;
+    }
 
-/* =======================================
-   Responsive
-======================================= */
-@media (max-width:720px) {
-    .wrap { flex-direction: column; width: 90%; }
-    .container { width: 90%; padding: 30px 20px; }
-}
+    /* =======================================
+    Footer
+    ======================================= */
+    footer {
+        margin-top: 18px;
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* =======================================
+    Modal Styles (for logout etc)
+    ======================================= */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1200;
+    }
+
+    .modal {
+        background: #fff;
+        color: #222;
+        border-radius: 12px;
+        padding: 20px;
+        width: 92%;
+        max-width: 420px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    .modal h3 {
+        margin: 0 0 8px 0;
+    }
+
+    .modal p {
+        margin: 0 0 16px 0;
+        color: #444;
+    }
+
+    .modal .modal-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+    }
+
+    .modal .modal-actions .btn {
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+
+    /* =======================================
+    Responsive
+    ======================================= */
+    @media (max-width:720px) {
+        .wrap {
+            flex-direction: column;
+            width: 90%;
+        }
+
+        .container {
+            width: 90%;
+            padding: 30px 20px;
+        }
+    }
