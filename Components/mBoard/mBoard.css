@@ -55,20 +55,6 @@
 
 /* tiles.css */
 
-.tile {
-  border: 0.5px solid #000000;
-  background-color: rgb(122, 184, 235);
-  display: flex;
-  width: 80px;
-  height: 80px;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  font-size: 30px;
-  position: relative;
-  padding: 2px;
-  box-sizing: border-box;
-}
 
 .tile-color {
   width: 100%;
@@ -79,18 +65,6 @@
   text-align: center;
   font-size: 12px;
   margin-top: 2px;
-}
-
-.player-placeholder {
-  position: absolute;
-  height: 10px;
-  width: 10px;
-  bottom: 12px;
-  right: 15px;
-  display: flex;
-  gap: 2px;
-  align-items: center;
-  justify-content: center;
 }
 
 /* Assign each tile to its grid position */
@@ -413,36 +387,40 @@ button:hover {
 ======================================= */
 .board {
   display: grid;
-  width: 891px;
+  width: auto;
   height: 891px;
-  grid-template-columns: repeat(11, 81px);
+  grid-template-columns: repeat(11, 120px);
   grid-template-rows: repeat(11, 81px);
   margin: 20px auto;
-  background-color: #d6eafa;
-  border: 3px solid #fff;
-  border-radius: 20px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  background-color: #fefae0;
+  border: 1px solid #797979;
+  border-radius: 10px;
+  overflow: hidden;
   position: relative;
 }
 
 /* Tiles */
 .tile {
-  border: 1px solid #333;
+  border: 0.5px solid #6a6a6a;
+  background-color: #fefae0;
   display: flex;
+  width: 80px;
+  height: 80px;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  font-size: 12px;
+  font-size: 30px;
   position: relative;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-sizing: border-box;
+  width: 100%;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  border-radius: 4px;
 }
 
 .tile:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+  box-shadow: 4px 2px 15px rgb(255, 255, 255);
 }
 
 .tile-color {
@@ -459,10 +437,13 @@ button:hover {
 
 .player-placeholder {
   position: absolute;
-  bottom: 5px;
+  height: 20px;
+  width: 78px;
+  bottom: 12px;
   display: flex;
-  gap: 2px;
-  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Players */

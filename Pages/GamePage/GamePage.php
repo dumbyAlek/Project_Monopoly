@@ -18,10 +18,10 @@
 
             <h2>Players</h2>
             <div class="player-info">
-                <p>Player 1: $1,500</p>
-                <p>Player 2: $1,500</p>
-                <p>Player 3: $1,500</p>
-                <p>Player 4: $1,500</p>
+                <p class="player1">Player 1: $1,500</p>
+                <p class="player2">Player 2: $1,500</p>
+                <p class="player3">Player 3: $1,500</p>
+                <p class="player4">Player 4: $1,500</p>
             </div>
         </aside>
 
