@@ -1,8 +1,9 @@
 <?php
 session_start();
-require_once __DIR__ . '/../../Database/db_connect.php';
+require_once __DIR__ . '/../../Database/Database.php';
 
 $message = '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $uname = trim($_POST['username'] ?? '');
     $pwd = trim($_POST['password'] ?? '');
@@ -10,77 +11,63 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($uname === '' || $pwd === '' || $pwd !== $pwd2) {
         $message = "Fill fields and ensure passwords match.";
+    } elseif (strlen($uname) > 100 || strlen($pwd) > 256) {
+        $message = "Input too long.";
     } else {
+        $db = Database::getInstance();
+        $con = $db->getConnection();
+
         $stmt = $con->prepare("SELECT player_id FROM Player WHERE username = ?");
-        $stmt->bind_param("s", $uname);
-        $stmt->execute();
-        $stmt->store_result();
-        if ($stmt->num_rows > 0) {
-            $message = "Username already exists.";
+        if ($stmt) {
+            $stmt->bind_param("s", $uname);
+            $stmt->execute();
+            $stmt->store_result();
+            if ($stmt->num_rows > 0) {
+                $message = "Username already exists.";
+            } else {
+                $hash = password_hash($pwd, PASSWORD_DEFAULT);
+                $ins = $con->prepare("INSERT INTO Player (username, password, money, position) VALUES (?, ?, ?, ?)");
+                $defaultMoney = 1500;
+                $defaultPos = 0;
+                $ins->bind_param("ssii", $uname, $hash, $defaultMoney, $defaultPos);
+                if ($ins->execute()) {
+                    $_SESSION['username'] = $uname;
+                    header('Location: ../HomePage/HomePage.php');
+                    exit;
+                } else {
+                    $message = "Error creating account.";
+                }
+                $ins->close();
+            }
             $stmt->close();
         } else {
-            $stmt->close();
-            $hash = password_hash($pwd, PASSWORD_BCRYPT);
-            $ins = $con->prepare("INSERT INTO Player (username, password, money, position) VALUES (?, ?, ?, ?)");
-            $defaultMoney = 1500; $defaultPos = 0;
-            $ins->bind_param("ssii", $uname, $hash, $defaultMoney, $defaultPos);
-            if ($ins->execute()) {
-                $_SESSION['username'] = $uname;
-                header('Location: ../GamePage/gamepage.php');
-                exit;
-            } else {
-                $message = "Error creating account.";
-            }
-            $ins->close();
+            $message = "Database error.";
         }
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Sign Up</title>
-<style>
-    body {
-        margin: 0; padding: 0; height: 100vh;
-        display: flex; justify-content: center; align-items: center;
-        background: url("../../Assets/bg.jpg") no-repeat center center/cover;
-        font-family: Arial, sans-serif;
-    }
-    .container {
-        text-align: center;
-        background: rgba(100, 177, 255, 0.54);
-        padding: 40px 60px;
-        border-radius: 20px;
-        backdrop-filter: blur(3px);
-    }
-    h3 { margin-bottom: 20px; color: #fff; }
-    input {
-        width: 100%; padding: 12px; margin: 10px 0;
-        border-radius: 10px; border: none; font-size: 16px;
-    }
-    button {
-        width: 100%; padding: 12px; margin-top: 15px;
-        font-size: 18px; border: none; border-radius: 10px;
-        background: #4caf50; color: white; cursor: pointer;
-        transition: 0.2s ease;
-    }
-    button:hover { opacity: 0.8; color: rgba(207, 47, 236, 1); }
-    .message { color: red; margin-bottom: 10px; }
-</style>
+<link rel="stylesheet" href="../../../Assets/css/style.css">
 </head>
 <body>
     <div class="container">
         <h3>Sign Up</h3>
-        <?php if ($message) echo "<div class='message'>".htmlspecialchars($message)."</div>"; ?>
-        <form method="post">
-            <input name="username" placeholder="Username" required>
-            <input name="password" type="password" placeholder="Password" required>
-            <input name="password_confirm" type="password" placeholder="Confirm Password" required>
-            <button type="submit">Create account</button>
+        <?php if ($message): ?>
+            <div class="message"><?= htmlspecialchars($message) ?></div>
+        <?php endif; ?>
+        <form method="post" autocomplete="off">
+            <input name="username" placeholder="Username" required maxlength="100">
+            <input name="password" type="password" placeholder="Password" required maxlength="256" autocomplete="new-password">
+            <input name="password_confirm" type="password" placeholder="Confirm Password" required maxlength="256" autocomplete="new-password">
+            <button type="submit" class="primary">Create Account</button>
         </form>
+        <a class="login-link" href="../LoginPage/LoginPage.php">Already have an account? Login</a>
     </div>
 </body>
 </html>

@@ -11,24 +11,26 @@
 </head>
 <body>
     <div class="game-container">
-        <div class="sidebar">
+        <!-- Sidebar -->
+        <aside class="sidebar">
             <h2>Bank</h2>
-            <p>Bank Money: $10000</p>
+            <p class="bank-money">Bank Money: $10,000</p>
 
             <h2>Players</h2>
             <div class="player-info">
-                <p>Player 1: $1500</p>
-                <p>Player 2: $1500</p>
-                <p>Player 3: $1500</p>
-                <p>Player 4: $1500</p>
+                <p class="player1">Player 1: $1,500</p>
+                <p class="player2">Player 2: $1,500</p>
+                <p class="player3">Player 3: $1,500</p>
+                <p class="player4">Player 4: $1,500</p>
             </div>
-        </div>
+        </aside>
 
-        <div class="board-container">
+        <!-- Board Area -->
+        <main class="board-container">
             <div class="board-block">
                 <?php include "../../Components/mBoard/mBoard.php"; ?>
             </div>
-        </div>
+        </main>
     </div>
 
     <script src="GamePage.js"></script>
