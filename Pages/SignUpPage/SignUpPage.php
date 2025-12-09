@@ -1,9 +1,9 @@
 <?php
-// SignUpPage.php
 session_start();
-require_once __DIR__ . '/../../Database/db_connect.php'; // includes db_config.php and $con
+require_once __DIR__ . '/../../Database/Database.php';
 
 $message = '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $uname = trim($_POST['username'] ?? '');
     $pwd = trim($_POST['password'] ?? '');
@@ -11,48 +11,63 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($uname === '' || $pwd === '' || $pwd !== $pwd2) {
         $message = "Fill fields and ensure passwords match.";
+    } elseif (strlen($uname) > 100 || strlen($pwd) > 256) {
+        $message = "Input too long.";
     } else {
-        // check existence
+        $db = Database::getInstance();
+        $con = $db->getConnection();
+
         $stmt = $con->prepare("SELECT player_id FROM Player WHERE username = ?");
-        $stmt->bind_param("s", $uname);
-        $stmt->execute();
-        $stmt->store_result();
-        if ($stmt->num_rows > 0) {
-            $message = "Username already exists.";
+        if ($stmt) {
+            $stmt->bind_param("s", $uname);
+            $stmt->execute();
+            $stmt->store_result();
+            if ($stmt->num_rows > 0) {
+                $message = "Username already exists.";
+            } else {
+                $hash = password_hash($pwd, PASSWORD_DEFAULT);
+                $ins = $con->prepare("INSERT INTO Player (username, password, money, position) VALUES (?, ?, ?, ?)");
+                $defaultMoney = 1500;
+                $defaultPos = 0;
+                $ins->bind_param("ssii", $uname, $hash, $defaultMoney, $defaultPos);
+                if ($ins->execute()) {
+                    $_SESSION['username'] = $uname;
+                    header('Location: ../HomePage/HomePage.php');
+                    exit;
+                } else {
+                    $message = "Error creating account.";
+                }
+                $ins->close();
+            }
             $stmt->close();
         } else {
-            $stmt->close();
-            // Hash password using PHP's password_hash (bcrypt by default)
-            $hash = password_hash($pwd, PASSWORD_BCRYPT);
-            // Insert: set defaults for money/position etc. Adjust columns per your Player schema.
-            $ins = $con->prepare("INSERT INTO Player (username, password, money, position) VALUES (?, ?, ?, ?)");
-            $defaultMoney = 1500; $defaultPos = 0;
-            $ins->bind_param("ssii", $uname, $hash, $defaultMoney, $defaultPos);
-            if ($ins->execute()) {
-                $_SESSION['username'] = $uname;
-                header('Location: ../GamePage/gamepage.php');
-                exit;
-            } else {
-                $message = "Error creating account.";
-            }
-            $ins->close();
+            $message = "Database error.";
         }
     }
 }
 ?>
-<!doctype html>
-<html>
-<head><meta charset="utf-8"><title>Sign Up</title></head>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sign Up</title>
+<link rel="stylesheet" href="../../../Assets/css/style.css">
+</head>
 <body>
-  <div style="width:360px;margin:40px auto;padding:20px;border:1px solid #eee;">
-    <h3>Sign Up</h3>
-    <?php if ($message) echo "<div style='color:red;'>".htmlspecialchars($message)."</div>"; ?>
-    <form method="post" action="">
-      <input name="username" placeholder="Username" required style="width:100%;padding:8px;margin:8px 0;"><br>
-      <input name="password" type="password" placeholder="Password" required style="width:100%;padding:8px;margin:8px 0;"><br>
-      <input name="password_confirm" type="password" placeholder="Confirm Password" required style="width:100%;padding:8px;margin:8px 0;"><br>
-      <button type="submit">Create account</button>
-    </form>
-  </div>
+    <div class="container">
+        <h3>Sign Up</h3>
+        <?php if ($message): ?>
+            <div class="message"><?= htmlspecialchars($message) ?></div>
+        <?php endif; ?>
+        <form method="post" autocomplete="off">
+            <input name="username" placeholder="Username" required maxlength="100">
+            <input name="password" type="password" placeholder="Password" required maxlength="256" autocomplete="new-password">
+            <input name="password_confirm" type="password" placeholder="Confirm Password" required maxlength="256" autocomplete="new-password">
+            <button type="submit" class="primary">Create Account</button>
+        </form>
+        <a class="login-link" href="../LoginPage/LoginPage.php">Already have an account? Login</a>
+    </div>
 </body>
 </html>
