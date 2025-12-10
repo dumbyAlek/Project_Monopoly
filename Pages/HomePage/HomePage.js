@@ -9,6 +9,7 @@ function goToGame() {
   const modal = document.getElementById("logoutModal");
   const cancelBtn = document.getElementById("cancelLogout");
   const confirmBtn = document.getElementById("confirmLogout");
+  const signUpBtn = document.getElementById("SignUpBtn");
 
   // Show modal helper
   function openModal() {
@@ -46,6 +47,10 @@ function goToGame() {
     confirmBtn.textContent = "Logging out...";
     logoutForm.submit();
   });
+
+  // signUpBtn.addEventListener("click", function(e)){
+
+  // }
 
   // Close modal on overlay click (if user clicks outside the modal area)
   modal.addEventListener("click", function (e) {

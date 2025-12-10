@@ -1,13 +1,47 @@
--- 1. Create database
-CREATE DATABASE IF NOT EXISTS Monopoly;
-USE Monopoly;
-
--- 2. ADMIN
-CREATE TABLE IF NOT EXISTS Admin (
-    admin_id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(100) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL
+-- User Accounts
+CREATE TABLE IF NOT EXISTS User(
+    user_id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(100) NOT NULL,
+    useremail VARCHAR(255),
+    password VARCHAR(255) NOT NULL,
+    wins INT DEFAULT 0,
+    losses INT DEFAULT 0,
+    user_created DATE
 );
+
+-- ADMIN
+CREATE TABLE IF NOT EXISTS Admin (
+    user_id INT PRIMARY KEY,
+    admin_id VARCHAR(50) UNIQUE,
+    FOREIGN KEY (user_id) REFERENCES User(user_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Game (
+    game_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,              
+    start_time DATETIME NOT NULL,
+    last_saved_time DATETIME,
+    status ENUM('ongoing','completed') NOT NULL DEFAULT 'ongoing',
+    current_turn INT,
+    save_file_path VARCHAR(255),
+    FOREIGN KEY (user_id) REFERENCES User(user_id)
+);
+
+--  PLAYER
+CREATE TABLE IF NOT EXISTS Player (
+    player_id INT AUTO_INCREMENT PRIMARY KEY,
+    player_name VARCHAR(300),
+    money INT NOT NULL,
+    position INT NOT NULL,
+    is_in_jail BOOLEAN DEFAULT FALSE,
+    has_get_out_card BOOLEAN DEFAULT FALSE,
+    current_game_id INT,
+    FOREIGN KEY (current_game_id) REFERENCES Game(game_id)
+);
+
+
 
 -- 3. BANK
 CREATE TABLE IF NOT EXISTS Bank (
@@ -18,28 +52,6 @@ CREATE TABLE IF NOT EXISTS Bank (
     backup_status VARCHAR(50)
 );
 
--- 4. GAME
-CREATE TABLE IF NOT EXISTS Game (
-    game_id INT AUTO_INCREMENT PRIMARY KEY,
-    start_time DATETIME NOT NULL,
-    last_saved_time DATETIME,
-    status ENUM('ongoing','completed') NOT NULL DEFAULT 'ongoing',
-    current_turn INT,
-    save_file_path VARCHAR(255)
-);
-
--- 5. PLAYER
-CREATE TABLE IF NOT EXISTS Player (
-    player_id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(100) NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    money INT NOT NULL,
-    position INT NOT NULL,
-    is_in_jail BOOLEAN DEFAULT FALSE,
-    has_get_out_card BOOLEAN DEFAULT FALSE,
-    current_game_id INT,
-    FOREIGN KEY (current_game_id) REFERENCES Game(game_id)
-);
 
 -- 6. WALLET (1–1 with Player)
 CREATE TABLE IF NOT EXISTS Wallet (
@@ -123,15 +135,6 @@ CREATE TABLE IF NOT EXISTS Log (
     FOREIGN KEY (game_id) REFERENCES Game(game_id)
 );
 
--- 14. BACKUP
-CREATE TABLE IF NOT EXISTS Backup (
-    backup_id INT AUTO_INCREMENT PRIMARY KEY,
-    file_path VARCHAR(255) NOT NULL,
-    created_at DATETIME NOT NULL,
-    created_by INT NOT NULL,
-    FOREIGN KEY (created_by) REFERENCES Admin(admin_id)
-);
-
 -- 15. SAVE FILE
 CREATE TABLE IF NOT EXISTS SaveFile (
     save_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -151,10 +154,6 @@ CREATE TABLE IF NOT EXISTS Map (
     num_tiles INT
 );
 
--- Add foreign key: BoardTile → Map
-ALTER TABLE BoardTile
-    ADD CONSTRAINT fk_boardtile_map
-    FOREIGN KEY (map_id) REFERENCES Map(map_id);
 
 -- 17. SETTINGS (1–1 with Game)
 CREATE TABLE IF NOT EXISTS Settings (

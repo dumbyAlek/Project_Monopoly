@@ -79,7 +79,7 @@
             <button class="login-btn" onclick="location.href='Pages/LoginPage/LoginPage.php'">Login</button>
             <button class="signup-btn" onclick="location.href='Pages/SignUpPage/SignUpPage.php'">Sign Up</button>
         </div>
-        <button class="guest-btn" onclick="location.href='Pages/HomePage/HomePage.php'">Play as a Guest</button>
+        <button class="guest-btn" onclick="location.href='Pages/HomePage/HomePage.php?Session=Guest'">Play as a Guest</button>
     </div>
 
 </body>

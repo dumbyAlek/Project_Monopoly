@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($form_user === '' || $form_pass === '') {
         $message = 'Enter username and password.';
     } else {
-        $stmt = $con->prepare("SELECT password FROM Player WHERE username = ?");
+        $stmt = $con->prepare("SELECT password FROM User WHERE username = ?");
         $stmt->bind_param("s", $form_user);
         $stmt->execute();
         $stmt->store_result();
