@@ -8,7 +8,7 @@ class GameConfig {
     public $players;
     public $passGoMoney; // add this
 
-    public function __construct($bankFund, $playerMoney, $players, $passGoMoney = 200) {
+    public function __construct($bankFund, $playerMoney, $players, $passGoMoney) {
         $this->startingBankFund = $bankFund;
         $this->startingPlayerMoney = $playerMoney;
         $this->players = $players;
