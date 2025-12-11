@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once __DIR__ . '/../../Database/Database.php';
+require_once __DIR__ . '../../Backend/User.php';
 
 $message = '';
 
@@ -14,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($form_user === '' || $form_pass === '') {
         $message = 'Enter username and password.';
     } else {
-        $stmt = $con->prepare("SELECT password FROM Player WHERE username = ?");
+        $stmt = $con->prepare("SELECT password FROM User WHERE username = ?");
         $stmt->bind_param("s", $form_user);
         $stmt->execute();
         $stmt->store_result();
@@ -24,7 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->fetch();
 
             if (password_verify($form_pass, $hash)) {
-                $_SESSION['username'] = $form_user;
+                session_start(); // make sure session is started
+                setUserSession($form_user);
                 header('Location: ../HomePage/HomePage.php');
                 exit;
             } else {
