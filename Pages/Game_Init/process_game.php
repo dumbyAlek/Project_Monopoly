@@ -11,6 +11,7 @@ if (!$db) die("DB connection failed.");
 // Collect starting values
 $startingBankFund = isset($_POST['starting_bank_fund']) ? intval($_POST['starting_bank_fund']) : 15000;
 $startingPlayerMoney = isset($_POST['starting_player_money']) ? intval($_POST['starting_player_money']) : 1500;
+$passGoMoney = isset($_POST['pass_go_money']) ? intval($_POST['pass_go_money']) : 200;
 
 // Collect player names
 $names = [
@@ -29,7 +30,8 @@ $icons = ["🏰","🚗","🛵","🎩"];
 // Build config using Builder + Factory (optional for in-memory)
 $builder = new GameConfigBuilder();
 $builder->setStartingBankFund($startingBankFund)
-        ->setStartingPlayerMoney($startingPlayerMoney);
+        ->setStartingPlayerMoney($startingPlayerMoney)
+        ->setPassGoMoney($passGoMoney);
 
 for ($i = 0; $i < 4; $i++) {
     $playerObj = PlayerFactory::create($names[$i], $icons[$i], $i+1, $startingPlayerMoney);
@@ -42,20 +44,19 @@ $config = $builder->build();
 // =====================
 $user_id = isset($_SESSION['user_id']) ? intval($_SESSION['user_id']) : null;
 
-$stmt = $db->prepare("INSERT INTO Game (user_id, start_time, last_saved_time, status, current_turn, save_file_path)
-                      VALUES (?, NOW(), NULL, 'ongoing', 1, NULL)");
-if (!$stmt) die("Prepare failed (Game): " . $db->error);
-
-$stmt->bind_param("i", $user_id);
 if ($user_id === null) {
-    // bind NULL properly
-    $stmt = $db->prepare("INSERT INTO Game (user_id, start_time, last_saved_time, status, current_turn, save_file_path)
-                          VALUES (NULL, NOW(), NULL, 'ongoing', 1, NULL)");
+    $stmt = $db->prepare("INSERT INTO Game (user_id, start_time, last_saved_time, passing_GO, status, current_turn, save_file_path)
+                          VALUES (NULL, NOW(), NOW(), ?, 'ongoing', 1, NULL)");
     if (!$stmt) die("Prepare failed (Game NULL user): " . $db->error);
-    $stmt->execute();
+    $stmt->bind_param("i", $passGoMoney);
 } else {
-    if (!$stmt->execute()) die("Game insert failed: " . $stmt->error);
+    $stmt = $db->prepare("INSERT INTO Game (user_id, start_time, last_saved_time, passing_GO, status, current_turn, save_file_path)
+                          VALUES (?, NOW(), NOW(), ?, 'ongoing', 1, NULL)");
+    if (!$stmt) die("Prepare failed (Game): " . $db->error);
+    $stmt->bind_param("ii", $user_id, $passGoMoney);
 }
+
+if (!$stmt->execute()) die("Game insert failed: " . $stmt->error);
 $game_id = $db->insert_id;
 $stmt->close();
 

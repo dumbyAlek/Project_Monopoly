@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS Game (
     user_id INT,              
     start_time DATETIME NOT NULL,
     last_saved_time DATETIME,
+    passing_GO INT NOT NULL,
     status ENUM('ongoing','completed') NOT NULL DEFAULT 'ongoing',
     current_turn INT,
     save_file_path VARCHAR(255),

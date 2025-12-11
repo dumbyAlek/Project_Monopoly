@@ -79,7 +79,7 @@ if ($player_id !== null) {
         <?php } ?>
 
         <?php if ($lastSave): ?>
-          <form method="get" action="../GameActions/load_game.php" style="margin:0;">
+          <form method="get" action="../LoadGame/LoadGame.php" style="margin:0;">
             <input type="hidden" name="save_id" value="<?= (int)$lastSave['save_id'] ?>">
             <button type="submit" class="btn" id="resumeBtn">Continue Last Saved Game</button>
             <div class="meta small">Last saved: <?= htmlspecialchars($lastSave['saved_time']) ?> — status: <?= htmlspecialchars($lastSave['status']) ?></div>

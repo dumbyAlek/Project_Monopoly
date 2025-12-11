@@ -27,6 +27,9 @@
         <label>Starting Players Money:
             <input type="number" name="starting_player_money" id="starting_player_money" value="1500" min="0" required>
         </label>
+        <label>Money for Passing GO:
+            <input type="number" name="pass_go_money" id="pass_go_money" value="200" min="0" required>
+        </label>
     </div>
 
     <div class="players-container">
@@ -63,7 +66,7 @@
 
     <div class="form-actions">
         <button type="submit">Start Game</button>
-        <button type="button" onclick="location.href='saved_games.php'">View Saved Games</button>
+        <button type="button" onclick="location.href='../LoadGame/LoadGame.php'">View Saved Games</button>
     </div>
 </form>
 

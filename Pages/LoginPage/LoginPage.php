@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once __DIR__ . '/../../Database/Database.php';
+require_once __DIR__ . '/User.php';
 
 $message = '';
 
@@ -24,7 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->fetch();
 
             if (password_verify($form_pass, $hash)) {
-                $_SESSION['username'] = $form_user;
+                session_start(); // make sure session is started
+                setUserSession($form_user);
                 header('Location: ../HomePage/HomePage.php');
                 exit;
             } else {
