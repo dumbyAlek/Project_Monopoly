@@ -12,7 +12,7 @@ $user_id = isset($_SESSION['user_id']) ? intval($_SESSION['user_id']) : null;
 // Fetch saved games
 $query = "SELECT g.game_id, g.last_saved_time, g.status, g.passing_GO, b.total_funds AS bank_funds
           FROM Game g
-          LEFT JOIN Bank b ON g.game_id = b.bank_id";
+          LEFT JOIN Bank b ON g.game_id = b.game_id";
 
 if ($user_id !== null) {
     $query .= " WHERE g.user_id = ?";
