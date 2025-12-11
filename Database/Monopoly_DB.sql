@@ -42,15 +42,14 @@ CREATE TABLE IF NOT EXISTS Player (
     FOREIGN KEY (current_game_id) REFERENCES Game(game_id)
 );
 
-
-
--- 3. BANK
+-- Bank
 CREATE TABLE IF NOT EXISTS Bank (
     bank_id INT AUTO_INCREMENT PRIMARY KEY,
+    game_id INT NOT NULL,
     total_funds BIGINT NOT NULL,
-    mortgage_rate DECIMAL(5,2) NOT NULL,
-    interest_rate DECIMAL(5,2) NOT NULL,
-    backup_status VARCHAR(50)
+    FOREIGN KEY (game_id) REFERENCES Game(game_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 
@@ -119,12 +118,6 @@ CREATE TABLE IF NOT EXISTS Card (
     description TEXT NOT NULL,
     effect_type ENUM('move','pay','receive','jail','get_out_card','other') NOT NULL,
     value INT
-);
-
--- 12. DICE
-CREATE TABLE IF NOT EXISTS Dice (
-    dice_id INT AUTO_INCREMENT PRIMARY KEY,
-    value INT NOT NULL
 );
 
 -- 13. LOG
