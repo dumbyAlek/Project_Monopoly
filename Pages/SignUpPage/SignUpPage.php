@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once __DIR__ . '/../../Database/Database.php';
+require_once __DIR__ . '/../../Backend/User.php'; // same helper used by login
 
 $message = '';
 
@@ -17,7 +18,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $db = Database::getInstance();
         $con = $db->getConnection();
 
-        $stmt = $con->prepare("SELECT player_id FROM Player WHERE username = ?");
+        // Check username exists in the same table used by login (User)
+        $stmt = $con->prepare("SELECT user_id FROM User WHERE username = ?");
         if ($stmt) {
             $stmt->bind_param("s", $uname);
             $stmt->execute();
@@ -25,23 +27,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($stmt->num_rows > 0) {
                 $message = "Username already exists.";
             } else {
+                // Ready to insert into User table
                 $hash = password_hash($pwd, PASSWORD_DEFAULT);
-                $ins = $con->prepare("INSERT INTO Player (username, password, money, position) VALUES (?, ?, ?, ?)");
-                $defaultMoney = 1500;
-                $defaultPos = 0;
-                $ins->bind_param("ssii", $uname, $hash, $defaultMoney, $defaultPos);
-                if ($ins->execute()) {
-                    $_SESSION['username'] = $uname;
-                    header('Location: ../index.php');
-                    exit;
+                $created = date('Y-m-d'); // user_created DATE column
+                $useremail = ''; // no email field in form; keep empty string (or change if you add an email input)
+
+                $ins = $con->prepare("INSERT INTO User (username, useremail, password, user_created) VALUES (?, ?, ?, ?)");
+                if ($ins) {
+                    $ins->bind_param("ssss", $uname, $useremail, $hash, $created);
+                    if ($ins->execute()) {
+                        // Set session the same way login does
+                        setUserSession($uname);
+
+                        // Redirect to homepage
+                        header('Location: ../HomePage/HomePage.php');
+                        exit;
+                    } else {
+                        $message = "Error creating account. Please try again.";
+                    }
+                    $ins->close();
                 } else {
-                    $message = "Error creating account.";
+                    $message = "Database error: failed to prepare insert.";
                 }
-                $ins->close();
             }
             $stmt->close();
         } else {
-            $message = "Database error.";
+            $message = "Database error: failed to prepare statement.";
         }
     }
 }
@@ -59,10 +70,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="container">
         <h3>Sign Up</h3>
         <?php if ($message): ?>
-            <div class="message"><?= htmlspecialchars($message) ?></div>
+            <div class="message"><?= htmlspecialchars($message, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></div>
         <?php endif; ?>
         <form method="post" autocomplete="off">
-            <input name="username" placeholder="Username" required maxlength="100">
+            <input name="username" placeholder="Username" required maxlength="100" value="<?= isset($uname) ? htmlspecialchars($uname, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') : '' ?>">
             <input name="password" type="password" placeholder="Password" required maxlength="256" autocomplete="new-password">
             <input name="password_confirm" type="password" placeholder="Confirm Password" required maxlength="256" autocomplete="new-password">
             <button type="submit" class="primary">Create Account</button>
