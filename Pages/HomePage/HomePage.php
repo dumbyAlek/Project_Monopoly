@@ -85,13 +85,9 @@ if ($player_id !== null) {
             <div class="meta small">Last saved: <?= htmlspecialchars($lastSave['saved_time']) ?> — status: <?= htmlspecialchars($lastSave['status']) ?></div>
           </form>
         <?php else: ?>
-        <?php if (isset($_SESSION['username']) && $_SESSION['username'] !== "Guest") { ?>
-          <button class="btn ghost" disabled title="No saved games found">No Saved Games</button>
-          <div class="meta small">You have no saved games. Start a new game to create saves.</div>
-        <?php } ?>
         <?php endif; ?>
         <?php if (isset($_SESSION['username']) && $_SESSION['username'] !== "Guest") { ?>
-        <a class="btn ghost" href="../SavedGames/SavedGames.php">Browse Saved Games</a>
+        <a class="btn ghost" href='../LoadGame/LoadGame.php'>Browse Saved Games</a>
         <a class="btn ghost" href="../SettingsPage/SettingsPage.php">Settings</a>
         <?php } ?>
 
