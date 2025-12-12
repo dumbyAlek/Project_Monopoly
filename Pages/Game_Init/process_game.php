@@ -63,9 +63,9 @@ $stmt->close();
 // =====================
 // Insert Bank row
 // =====================
-$bst = $db->prepare("INSERT INTO Bank (total_funds, mortgage_rate, interest_rate, backup_status) VALUES (?, 0.00, 0.00, '')");
+$bst = $db->prepare("INSERT INTO Bank (game_id, total_funds) VALUES (?, ?)");
 if (!$bst) die("Prepare failed (Bank): " . $db->error);
-$bst->bind_param("i", $startingBankFund);
+$bst->bind_param("ii", $game_id, $startingBankFund);
 if (!$bst->execute()) die("Bank insert failed: " . $bst->error);
 $bank_id = $bst->insert_id;
 $bst->close();

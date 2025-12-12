@@ -12,7 +12,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background: url("Assets/bg.jpg") no-repeat center center/cover;
+            background: url("Assets/bg.webp") no-repeat center center/cover;
             font-family: Arial, sans-serif;
         }
 
@@ -74,7 +74,7 @@
 <body>
 
     <div class="container">
-        <img src="Assets/Logo.png" alt="Logo" class="logo" />
+        <img src="Assets/Logo.webp" alt="Logo" class="logo" />
         <div class="button-row">
             <button class="login-btn" onclick="location.href='Pages/LoginPage/LoginPage.php'">Login</button>
             <button class="signup-btn" onclick="location.href='Pages/SignUpPage/SignUpPage.php'">Sign Up</button>

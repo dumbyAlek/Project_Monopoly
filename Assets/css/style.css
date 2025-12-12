@@ -1,269 +1,402 @@
-    /* =======================================
-    Global & Body Styles
-    ======================================= */
-    :root {
-        --card-bg: rgba(100, 177, 255, 0.54);
-        --accent: #4caf50;
-        --danger: #f44336;
-    }
+/* ==========================
+   PRIMARY STYLES (first file) - KEEP AS PRIORITY
+   ========================== */
+:root {
+    --card-bg: rgba(100, 177, 255, 0.54);
+    --accent: #4caf50;
+    --danger: #f44336;
+}
 
-    html {
-        height: 100vh;
-        margin: 0;
-        padding: 0;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
+html {
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 
-    body {
-        background: url("../../Assets/bg.jpg") no-repeat center center/cover;
-        display: flex;
-        align-items: center;
-        height: 100vh;
-        justify-content: center;
-    }
+body {
+    background: url("../../Assets/bg.webp") no-repeat center center/cover;
+    display: flex;
+    align-items: center;
+    height: 100vh;
+    justify-content: center;
+}
 
-    /* =======================================
-    Container / Panel Styles
-    ======================================= */
-    .container,
-    .wrap,
-    .panel {
-        background: rgba(114, 134, 96, 0.55);
-        padding: 30px 40px;
-        border-radius: 20px;
-        backdrop-filter: blur(12px);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
-        color: #fff;
+/* Container / Panel Styles */
+.container,
+.wrap,
+.panel {
+    background: rgba(114, 134, 96, 0.55);
+    padding: 30px 40px;
+    border-radius: 20px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    color: #fff;
+}
+
+.container {
+    width: 360px;
+    text-align: center;
+}
+
+.panel {
+    padding: 26px;
+}
+
+/* Headings */
+h1,
+h3 {
+    margin: 0 0 10px 0;
+    font-size: 28px;
+}
+
+h3 {
+    margin-bottom: 25px;
+}
+
+/* Subtitles & Meta Text */
+.subtitle {
+    margin: 0 0 18px 0;
+    opacity: 0.95;
+}
+
+.meta {
+    color: rgba(255, 255, 255, 0.9);
+    margin-top: 8px;
+    font-size: 14px;
+}
+
+.small {
+    font-size: 13px;
+    opacity: 0.9;
+}
+
+/* Forms & Inputs */
+input {
+    width: 100%;
+    padding: 12px 14px;
+    margin: 10px 0;
+    border-radius: 12px;
+    border: none;
+    font-size: 16px;
+    background: rgba(255, 255, 255, 0.25);
+    color: #fff;
+    outline: none;
+    transition: 0.3s;
+}
+
+input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+input:focus {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+/* Buttons */
+button,
+.btn {
+    display: inline-block;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    text-align: center;
+    transition: 0.3s;
+}
+
+button:hover,
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+/* Variants */
+.btn.primary,
+button.primary {
+    background: var(--accent);
+    color: #fff;
+    width: 100%;
+}
+
+.btn.ghost,
+button.ghost {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.58);
+    color: #fff;
+}
+
+.btn.danger,
+button.danger {
+    background: var(--danger);
+    color: #fff;
+}
+
+/* Special for HomePage start button */
+.start-btn {
+    background: #4c8bf5;
+    color: #fff;
+    font-size: 20px;
+    padding: 15px 30px;
+}
+
+.start-btn:hover {
+    opacity: 0.85;
+}
+
+/* Login/Signup link button */
+.login-link {
+    margin-top: 12px;
+    display: inline-block;
+    padding: 10px 15px;
+    border-radius: 10px;
+    border: 1px solid #fff;
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.login-link:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Actions Container */
+.actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+/* Card Styles */
+.card {
+    padding: 14px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+}
+
+/* Navigation Links */
+nav a {
+    color: #fff;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 8px;
+}
+
+/* Footer */
+footer {
+    margin-top: 18px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1200;
+}
+
+.modal {
+    background: #fff;
+    color: #222;
+    border-radius: 12px;
+    padding: 20px;
+    width: 92%;
+    max-width: 420px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.modal h3 {
+    margin: 0 0 8px 0;
+}
+
+.modal p {
+    margin: 0 0 16px 0;
+    color: #444;
+}
+
+.modal .modal-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.modal .modal-actions .btn {
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width:720px) {
+    .wrap {
+        flex-direction: column;
+        width: 90%;
     }
 
     .container {
-        width: 360px;
-        text-align: center;
+        width: 90%;
+        padding: 30px 20px;
     }
+}
 
-    .panel {
-        padding: 26px;
-    }
 
-    /* =======================================
-    Headings
-    ======================================= */
-    h1,
-    h3 {
-        margin: 0 0 10px 0;
-        font-size: 28px;
-    }
+/* ==========================
+   ADDITIONAL / SECOND FILE RULES (only non-conflicting selectors)
+   These do not override the primary styles above.
+   ========================== */
 
-    h3 {
-        margin-bottom: 25px;
-    }
+/* ==========================
+   INIT STYLES (SECOND FILE) - NON-CONFLICTING COMPONENTS
+   ========================== */
 
-    /* =======================================
-    Subtitles & Meta Text
-    ======================================= */
-    .subtitle {
-        margin: 0 0 18px 0;
-        opacity: 0.95;
-    }
+/* Rules / Info Boxes */
+/* ==========================
+   INIT SCREEN STYLES - MATCH PRIMARY STYLES
+   ========================== */
 
-    .meta {
-        color: rgba(255, 255, 255, 0.9);
-        margin-top: 8px;
-        font-size: 14px;
-    }
+/* Rules Box */
+.rules-box {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 14px 18px;
+    border-left: 4px solid var(--accent);
+    margin-bottom: 18px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    color: #fff;
+    backdrop-filter: blur(8px);
+    transition: 0.3s;
+}
 
-    .small {
-        font-size: 13px;
-        opacity: 0.9;
-    }
+.rules-box:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
 
-    /* =======================================
-    Forms & Inputs
-    ======================================= */
-    input {
+/* Form Controls */
+.controls {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.controls label {
+    font-size: 15px;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.controls input {
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: none;
+    font-size: 16px;
+    background: rgba(255, 255, 255, 0.25);
+    color: #fff;
+    outline: none;
+    transition: 0.3s;
+}
+
+.controls input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.controls input:focus {
+    background: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 6px rgba(76, 139, 245, 0.5);
+}
+
+/* Players List */
+.players-container {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.player-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.player-label {
+    width: 180px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #fff;
+}
+
+.player-label .icon {
+    font-size: 20px;
+}
+
+/* Dropzone */
+.dropzone {
+    flex: 1;
+    min-height: 48px;
+    border: 2px dashed rgba(255, 255, 255, 0.45);
+    background: rgba(255, 255, 255, 0.06);
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    border-radius: 12px;
+    color: #fff;
+    transition: background 0.3s, border-color 0.3s;
+}
+
+.dropzone.highlight {
+    border-color: var(--accent);
+    background: rgba(76, 139, 245, 0.15);
+}
+
+/* Name Field (draggable input-like) */
+.name-field {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: none;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    font-size: 16px;
+    cursor: grab;
+    outline: none;
+    transition: 0.3s;
+}
+
+.name-field.dragging {
+    opacity: 0.5;
+}
+
+/* Form Actions */
+.form-actions {
+    margin-top: 12px;
+    display: flex;
+    gap: 12px;
+}
+
+.form-actions .btn {
+    flex: 1;
+    border-radius: 12px;
+    font-size: 16px;
+    padding: 12px;
+    transition: 0.3s;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 720px) {
+    .controls input,
+    .name-field {
         width: 100%;
-        padding: 12px 14px;
-        margin: 10px 0;
-        border-radius: 12px;
-        border: none;
-        font-size: 16px;
-        background: rgba(255, 255, 255, 0.25);
-        color: #fff;
-        outline: none;
-        transition: 0.3s;
     }
-
-    input::placeholder {
-        color: rgba(255, 255, 255, 0.7);
-    }
-
-    input:focus {
-        background: rgba(255, 255, 255, 0.4);
-    }
-
-    /* =======================================
-    Buttons
-    ======================================= */
-    button,
-    .btn {
-        display: inline-block;
-        padding: 12px 16px;
-        border-radius: 12px;
-        border: none;
-        cursor: pointer;
-        font-size: 16px;
-        text-align: center;
-        transition: 0.3s;
-    }
-
-    button:hover,
-    .btn:hover {
-        transform: translateY(-1px);
-    }
-
-    /* Variants */
-    .btn.primary,
-    button.primary {
-        background: var(--accent);
-        color: #fff;
-        width: 100%;
-    }
-
-    .btn.ghost,
-    button.ghost {
-        background: transparent;
-        border: 1px solid rgba(255, 255, 255, 0.58);
-        color: #fff;
-    }
-
-    .btn.danger,
-    button.danger {
-        background: var(--danger);
-        color: #fff;
-    }
-
-    /* Special for HomePage start button */
-    .start-btn {
-        background: #4c8bf5;
-        color: #fff;
-        font-size: 20px;
-        padding: 15px 30px;
-    }
-
-    .start-btn:hover {
-        opacity: 0.85;
-    }
-
-    /* Login/Signup link button */
-    .login-link {
-        margin-top: 12px;
-        display: inline-block;
-        padding: 10px 15px;
-        border-radius: 10px;
-        border: 1px solid #fff;
-        color: #fff;
-        text-decoration: none;
-        font-weight: bold;
-    }
-
-    .login-link:hover {
-        background: rgba(255, 255, 255, 0.2);
-    }
-
-    /* =======================================
-    Actions Container
-    ======================================= */
-    .actions {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        margin-top: 12px;
-    }
-
-    /* =======================================
-    Card Styles
-    ======================================= */
-    .card {
-        padding: 14px;
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.06);
-        color: #fff;
-    }
-
-    /* =======================================
-    Navigation Links
-    ======================================= */
-    nav a {
-        color: #fff;
-        text-decoration: none;
-        display: block;
-        margin-bottom: 8px;
-    }
-
-    /* =======================================
-    Footer
-    ======================================= */
-    footer {
-        margin-top: 18px;
-        font-size: 13px;
-        color: rgba(255, 255, 255, 0.8);
-    }
-
-    /* =======================================
-    Modal Styles (for logout etc)
-    ======================================= */
-    .modal-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.45);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 1200;
-    }
-
-    .modal {
-        background: #fff;
-        color: #222;
-        border-radius: 12px;
-        padding: 20px;
-        width: 92%;
-        max-width: 420px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-    }
-
-    .modal h3 {
-        margin: 0 0 8px 0;
-    }
-
-    .modal p {
-        margin: 0 0 16px 0;
-        color: #444;
-    }
-
-    .modal .modal-actions {
-        display: flex;
-        gap: 8px;
-        justify-content: flex-end;
-    }
-
-    .modal .modal-actions .btn {
-        padding: 10px 14px;
-        border-radius: 8px;
-        font-size: 14px;
-    }
-
-    /* =======================================
-    Responsive
-    ======================================= */
-    @media (max-width:720px) {
-        .wrap {
-            flex-direction: column;
-            width: 90%;
-        }
-
-        .container {
-            width: 90%;
-            padding: 30px 20px;
-        }
-    }
+}

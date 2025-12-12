@@ -1,15 +1,16 @@
 /* mBoard.css  */
 .board {
   display: grid;
-  width: 891px;
+  width: auto;
   height: 891px;
-  grid-template-columns: repeat(11, 81px);
+  grid-template-columns: repeat(11, 120px);
   grid-template-rows: repeat(11, 81px);
+  margin: 20px auto;
+  background-color: #feece0;
+  border: 1px solid #797979;
+  border-radius: 10px;
+  overflow: hidden;
   position: relative;
-  margin: 10px;
-  background-color: #d6eafa;
-  border: 2px solid #ffffff;
-  size: 10px;
 }
 
 .logo {
@@ -63,7 +64,8 @@
 
 .tile-name {
   text-align: center;
-  font-size: 12px;
+  font-size: 15px;
+  font-weight: bolder;
   margin-top: 2px;
 }
 
@@ -357,7 +359,7 @@
   position: absolute;
   inset: 0;
   /* top:0; bottom:0; left:0; right:0 */
-  background: url('../../Assets/Logo.png') center/cover no-repeat;
+  background: url('../../Assets/Logo.webp') center/cover no-repeat;
   opacity: 0.2;
   /* light opacity */
   border-radius: 10px;
@@ -385,24 +387,12 @@ button:hover {
 /* =======================================
    Board Container
 ======================================= */
-.board {
-  display: grid;
-  width: auto;
-  height: 891px;
-  grid-template-columns: repeat(11, 120px);
-  grid-template-rows: repeat(11, 81px);
-  margin: 20px auto;
-  background-color: #fefae0;
-  border: 1px solid #797979;
-  border-radius: 10px;
-  overflow: hidden;
-  position: relative;
-}
+
 
 /* Tiles */
 .tile {
   border: 0.5px solid #6a6a6a;
-  background-color: #ceeaff;
+  background-color: #DEDFF8;
   display: flex;
   width: 80px;
   height: 80px;
@@ -432,7 +422,7 @@ button:hover {
   text-align: center;
   font-size: 11px;
   padding-top: 3px;
-  color: #111;
+  color: #000000;
 }
 
 .player-placeholder {
@@ -504,7 +494,7 @@ button:hover {
   content: '';
   position: absolute;
   inset: 0;
-  background: url('../../Assets/Logo.png') center/cover no-repeat;
+  background: url('../../Assets/Logo.webp') center/cover no-repeat;
   opacity: 0.15;
   border-radius: 15px;
   z-index: 0;
@@ -613,4 +603,39 @@ button:hover {
     height: 5vw;
     font-size: 3vw;
   }
+}
+
+.tile-details {
+  display: none; /* hidden by default */
+  position: absolute;
+  bottom: 90%; /* appear above the tile */
+  left: 50%;
+  transform: translateX(-50%);
+  background: #57a0c8;
+  border: 1px solid #333;
+  border-radius: 5px;
+  padding: 5px;
+  font-size: 10px;
+  width: 90px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  z-index: 50;
+}
+
+.tile:hover .tile-details {
+  display: block; /* show on hover */
+}
+.tile-details button {
+  font-size: 9px;
+  margin: 2px 0;
+  width: 100%;
+  cursor: pointer;
+  padding: 2px 0;
+}
+
+.tile-pic {
+  width: 60px;
+  height: 40px;
+  object-fit: cover;
+  margin-top: 3px;
+  border-radius: 3px;
 }

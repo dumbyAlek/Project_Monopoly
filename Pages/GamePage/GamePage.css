@@ -1,6 +1,4 @@
-/* ==============================
-   General Body
-============================== */
+/* GamePage.css */
 body {
     margin: 0;
     font-family: 'Arial', sans-serif;
@@ -26,7 +24,7 @@ body {
 ============================== */
 .sidebar {
     width: 320px;
-    background-color: #84a98c;
+    background-color: #8795AB;
     color: #ecf0f1;
     padding: 20px;
     box-sizing: border-box;
@@ -37,6 +35,9 @@ body {
     overflow-y: auto;
     border-right: 1px solid #34495e;
 }
+
+.left-sidebar { order: 0; }
+.right-sidebar { order: 2; }
 
 .sidebar h2 {
     margin-top: 0;
@@ -82,19 +83,18 @@ body {
    Board Container
 ============================== */
 .board-container {
+    order: 1;
     flex: 1;
-    box-sizing: border-box;
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow: hidden;
 }
 
 /* ==============================
    Board Block Wrapper
 ============================== */
 .board-block {
-    background-color: #ffe3fb;
+    background-color: #D2C3D5;
     padding: 15px;
     border-radius: 12px;
     width: 100%;
@@ -156,4 +156,114 @@ body {
     .board-block {
         padding: 10px;
     }
+}
+
+/* ==============================
+   Bank Panel Enhancements
+============================== */
+.bank-panel {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.cash-counter {
+    width: 100px;
+    height: auto;
+    margin-bottom: 10px;
+    border-radius: 8px;
+}
+
+.bank-panel p {
+    margin: 5px 0;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+#save-game-btn {
+    margin-top: 10px;
+    padding: 8px 15px;
+    font-size: 16px;
+    background-color: #4CAF50;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+}
+
+#save-game-btn:hover {
+    background-color: #45a049;
+}
+
+/* ==============================
+   Players Container
+============================== */
+.players-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Player Panels (dynamic) */
+.player-panel {
+    background-color: #6A74A0;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    color: #fff;
+    font-size: 14px;
+}
+
+.player-panel h3 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 0 10px 0;
+    font-size: 18px;
+}
+
+.player-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+}
+
+/* Player panel info */
+.player-panel p {
+    margin: 5px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Buttons inside player panel */
+.player-panel button {
+    margin-left: 5px;
+    padding: 5px 10px;
+    font-size: 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+/* Special buttons */
+.get-out-jail-btn {
+    background-color: #f44336;
+    color: #fff;
+    margin-top: 10px;
+}
+
+.get-out-jail-btn:disabled {
+    background-color: #888;
+    cursor: not-allowed;
+}
+
+.pay-loan-btn, .pay-debt-btn, .ask-debt-btn {
+    background-color: #2196F3;
+    color: #fff;
+}
+
+.pay-loan-btn:hover, .pay-debt-btn:hover, .ask-debt-btn:hover {
+    background-color: #1976d2;
 }
