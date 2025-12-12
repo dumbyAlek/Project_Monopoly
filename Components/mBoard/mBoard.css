@@ -639,3 +639,46 @@ button:hover {
   margin-top: 3px;
   border-radius: 3px;
 }
+
+.houses-container {
+  position: absolute;
+  top: 20px; /* above player placeholders but below name/image */
+  display: flex;
+  gap: 2px;
+  justify-content: center;
+  width: 100%;
+  pointer-events: none; /* so clicks pass through */
+}
+
+.houses-container img {
+  width: 15px;
+  height: 15px;
+  object-fit: contain;
+  transform: translateY(10px);
+  transition: transform 0.3s ease;
+}
+
+.houses-container .hotel {
+  width: 20px;
+  height: 20px;
+}
+
+.tile:hover .houses-container {
+  opacity: 1; /* show on hover */
+  transform: translateY(0);
+}
+
+.tile-sections {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  font-size: 9px;
+  margin-top: 2px;
+}
+.section {
+  width: 48%;
+  text-align: center;
+  border: 1px dashed #555;
+  padding: 1px;
+  background: #eee;
+}

@@ -28,9 +28,3 @@ document.getElementById("save-game-btn").onclick = () => GameFacade.saveGame();
 
 // Initial attach
 attachPlayerEvents();
-
-// Optional: refresh every 2 seconds to simulate live update
-setInterval(() => {
-    // Could re-fetch PHP data via AJAX or reload page section
-    attachPlayerEvents(); // Reattach events if DOM changes
-}, 2000);

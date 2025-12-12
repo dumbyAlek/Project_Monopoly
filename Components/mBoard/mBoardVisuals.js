@@ -1,5 +1,7 @@
 // mBoardVisuals.js
 export const board = document.querySelector(".board");
+import { TileFactory } from './TileFactory.js';
+import { TileDecorator } from './TileDecorator.js';
 
 // Dice faces
 export const diceFaces = [
@@ -11,28 +13,50 @@ export const diceFaces = [
   "../../Assets/dice6.webp"
 ];
 
+// TileFactory.createTile("property", ),
+
 // Tiles setup
 export const tiles = [
-  { name: "", img: "../../Assets/GO.webp" }, { name: "OLD KENT ROAD", color: "#4a270eff" },
-  { name: "COMMUNITY CHEST", img: "../../Assets/GO.webp" }, { name: "WHITECHAPEL ROAD", color: "#4a270eff" },
-  { name: "INCOME TAX", img: "../../Assets/tax.webp" }, { name: "KINGS ROSS STATION", img: "../../Assets/train.webp" },
-  { name: "THE ANGEL ISLINGTON", color: "#33a3ffff" }, { name: "CHANCE", img: "../../Assets/train.webp" },
-  { name: "EUSTON ROAD", color: "#33a3ffff" }, { name: "PENTONVILLE ROAD", color: "#33a3ffff" },
-  { name: "Jail / Just Visiting", color: "#ffffff" }, { name: "PALL MALL", color: "#f200ffff" },
-  { name: "ELECTRIC COMPANY", img: "../../Assets/bulb.webp" }, { name: "WHITE HALL", color: "#f200ffff" },
-  { name: "NORTHUMBERL'D AVENUE", color: "#f200ffff" }, { name: "MARYLEBONE STATION", img: "../../Assets/train.webp" },
-  { name: "BOW STREET", color: "#ff7b00ff" }, { name: "COMMUNITY CHEST", img: "../../Assets/GO.webp" },
-  { name: "MARLBOROUGH STREET", color: "#ff7b00ff" }, { name: "VINE STREET", color: "#ff7b00ff" },
-  { name: "FREE PARKING", img: "../../Assets/free.webp" }, { name: "STRAND", color: "#b50000ff" },
-  { name: "CHANCE", img: "../../Assets/train.webp" }, { name: "FLEET STREET", color: "#b50000ff" },
-  { name: "TRAFALGAR SQUARE", color: "#b50000ff" }, { name: "FENCHURCH ST. STATION", img: "../../Assets/train.webp" },
-  { name: "LEICSTER SQUARE", color: "#fff200ff" }, { name: "COVENTRY STREET", color: "#fff200ff" },
-  { name: "WATER WORKS", img: "../../Assets/tap.webp" }, { name: "PACCADILLY", color: "#fff200ff" },
-  { name: "GO TO JAIL", img: "../../Assets/go_jail.webp" }, { name: "REGENT STREET", color: "#096a00ff" },
-  { name: "OXFORD STREET", color: "#096a00ff" }, { name: "COMMUNITY CHEST", img: "../../Assets/GO.webp" },
-  { name: "BOND STREET", color: "#096a00ff" }, { name: "LIVERPOOL ST. STATION", img: "../../Assets/train.webp" },
-  { name: "CHANCE", img: "../../Assets/train.webp" }, { name: "PARK LANE", color: "#6802c1ff" },
-  { name: "LUXURY TAX", img: "../../Assets/tax.webp" }, { name: "MAYFAIR", color: "#6802c1ff" }
+  TileFactory.createTile("go", { name: "", img: "../../Assets/GO.webp" }),
+  TileFactory.createTile("property", { name: "OLD KENT ROAD", color: "#4a270eff" }),
+  TileFactory.createTile("community", { name: "COMMUNITY CHEST", img: "../../Assets/chest.webp" }), 
+  TileFactory.createTile("property", { name: "WHITECHAPEL ROAD", color: "#4a270eff" }),
+  TileFactory.createTile("tax", { name: "INCOME TAX", img: "../../Assets/tax.webp" }), 
+  TileFactory.createTile("station", { name: "KINGS ROSS STATION", img: "../../Assets/train.webp" }),
+  TileFactory.createTile("property", { name: "THE ANGEL ISLINGTON", color: "#33a3ffff" }),
+  TileFactory.createTile("chance", { name: "CHANCE", img: "../../Assets/ques.webp" }),
+  TileFactory.createTile("property", { name: "EUSTON ROAD", color: "#33a3ffff" }),
+  TileFactory.createTile("property", { name: "PENTONVILLE ROAD", color: "#33a3ffff" }),
+  TileFactory.createTile("jail", { name: "Jail / Just Visiting", img: "../../Assets/jail.webp"}),
+  TileFactory.createTile("property", { name: "PALL MALL", color: "#f200ffff" }),
+  TileFactory.createTile("utility", { name: "ELECTRIC COMPANY", img: "../../Assets/bulb.webp" }),
+  TileFactory.createTile("property", { name: "WHITE HALL", color: "#f200ffff" }),
+  TileFactory.createTile("property", { name: "NORTHUMBERL'D AVENUE", color: "#f200ffff" }),
+  TileFactory.createTile("station", { name: "MARYLEBONE STATION", img: "../../Assets/train.webp" }),
+  TileFactory.createTile("property", { name: "BOW STREET", color: "#ff7b00ff" }),
+  TileFactory.createTile("community", { name: "COMMUNITY CHEST", img: "../../Assets/chest.webp" }),
+  TileFactory.createTile("property", { name: "MARLBOROUGH STREET", color: "#ff7b00ff" }),
+  TileFactory.createTile("property", { name: "VINE STREET", color: "#ff7b00ff" }),
+  TileFactory.createTile("free", { name: "FREE PARKING", img: "../../Assets/free.webp" }),
+  TileFactory.createTile("property", { name: "STRAND", color: "#b50000ff" }),
+  TileFactory.createTile("chance", { name: "CHANCE", img: "../../Assets/ques.webp" }),
+  TileFactory.createTile("property", { name: "FLEET STREET", color: "#b50000ff" }),
+  TileFactory.createTile("property", { name: "TRAFALGAR SQUARE", color: "#b50000ff" }),
+  TileFactory.createTile("station", { name: "FENCHURCH ST. STATION", img: "../../Assets/train.webp" }),
+  TileFactory.createTile("property", { name: "LEICSTER SQUARE", color: "#fff200ff" }),
+  TileFactory.createTile("property", { name: "COVENTRY STREET", color: "#fff200ff" }),
+  TileFactory.createTile("utility", { name: "WATER WORKS", img: "../../Assets/tap.webp" }),
+  TileFactory.createTile("property", { name: "PACCADILLY", color: "#fff200ff" }),
+  TileFactory.createTile("goToJail", { name: "GO TO JAIL", img: "../../Assets/go_jail.webp" }),
+  TileFactory.createTile("property", { name: "REGENT STREET", color: "#096a00ff" }),
+  TileFactory.createTile("property", { name: "OXFORD STREET", color: "#096a00ff" }),
+  TileFactory.createTile("community", { name: "COMMUNITY CHEST", img: "../../Assets/chest.webp" }),
+  TileFactory.createTile("property", { name: "BOND STREET", color: "#096a00ff" }),
+  TileFactory.createTile("station", { name: "LIVERPOOL ST. STATION", img: "../../Assets/train.webp" }),
+  TileFactory.createTile("chance", { name: "CHANCE", img: "../../Assets/ques.webp" }),
+  TileFactory.createTile("property", { name: "PARK LANE", color: "#6802c1ff" }),
+  TileFactory.createTile("tax", { name: "LUXURY TAX", img: "../../Assets/tax.webp" }), 
+  TileFactory.createTile("property", { name: "MAYFAIR", color: "#6802c1ff" }),
 ];
 
 export const mappingLabels = [
@@ -42,38 +66,33 @@ export const mappingLabels = [
   "tile-L28","tile-L29","tile-L30","tile-L31","tile-L32","tile-L33","tile-L34","tile-L35","tile-L36"
 ];
 
-// // Generate tiles on board
-// export function generateTiles() {
-//   tiles.forEach((t, i) => {
-//     const tile = document.createElement("div");
-//     tile.classList.add("tile");
-//     tile.id = mappingLabels[i];
-//     tile.innerHTML = `<div class="tile-color" style="background:${t.color}"></div>
-//                       <div class="tile-name">${t.name}</div>
-//                       <div class="player-placeholder"></div>`;
-//     board.appendChild(tile);
-//   });
-// }
-
 export function generateTiles() {
   tiles.forEach((t, i) => {
     const tile = document.createElement("div");
     tile.classList.add("tile");
     tile.id = mappingLabels[i];
 
-    // Add hidden details div
-    tile.innerHTML = `
-      ${t.img ? `<img class="tile-pic" src="${t.img}" alt="${t.name}" />`
-              : `<div class="tile-color" style="background:${t.color}"></div>`}
-      <div class="tile-name">${t.name}</div>
-      <div class="player-placeholder"></div>
-      <div class="tile-details">
-        <p>Price: ${t.price ?? "N/A"}</p>
-        <p>Rent: ${t.rent ?? "N/A"}</p>
-        <button class="buy-btn">Buy</button>
-        <button class="sell-btn">Sell</button>
-      </div>
-    `;
+    // Picture or color
+    tile.innerHTML = t.img 
+      ? `<img class="tile-pic" src="${t.img}" alt="${t.name}" />` 
+      : `<div class="tile-color" style="background:${t.color}"></div>`;
+
+    // Name
+    tile.innerHTML += `<div class="tile-name">${t.name}</div>
+                      <div class="houses-container"></div>
+                      <div class="player-placeholder"></div>
+                      <div class="tile-details">
+                        <p>Price: ${t.price ?? "N/A"}</p>
+                        <p>Rent: ${t.rent ?? "N/A"}</p>
+                        <button class="buy-btn">Buy</button>
+                        <button class="sell-btn">Sell</button>
+                      </div>`;
+
+    // If tile has sections (like Jail)
+    if (t.sections) {
+      TileDecorator.addSections(tile, t.sections);
+    }
+
     board.appendChild(tile);
   });
 }

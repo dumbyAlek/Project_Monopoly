@@ -1,5 +1,7 @@
 // mBoard.js
 import { animateDice, diceFaces, getRandomPosition, mappingLabels , generateTiles} from './mBoardVisuals.js';
+import { tiles } from './mBoardVisuals.js';
+import { TileDecorator } from './TileDecorator.js';
 
 const rollBtn = document.getElementById("rollBtn");
 const diceResult = document.getElementById("diceResult");
@@ -50,6 +52,14 @@ export async function rollDice(mappingLabels) {
 
     const p = players[currentPlayerIndex];
     p.pos = (p.pos + total) % 40;
+
+    // Check if landed on Go To Jail
+    if (tiles[p.pos].category === "goToJail") {
+      // Find the jail tile index
+      const jailIndex = tiles.findIndex(t => t.category === "jail");
+      if (jailIndex !== -1) p.pos = jailIndex;
+    }
+
     movePlayer(p, mappingLabels);
 
     diceResult.textContent = `Player ${p.id} rolled ${die1} + ${die2} = ${total}`;
@@ -60,6 +70,8 @@ export async function rollDice(mappingLabels) {
 // Event listener
 rollBtn.addEventListener("click", () => rollDice(mappingLabels));
 initPlayers(mappingLabels);
+
+
 // Add button event listeners for all tiles
 tiles.forEach((t, i) => {
   const tileEl = document.getElementById(mappingLabels[i]);
@@ -77,3 +89,18 @@ tiles.forEach((t, i) => {
   });
 });
 
+export function updateHouses(tileIndex, houseCount, hasHotel = false) {
+  const tile = document.getElementById(mappingLabels[tileIndex]);
+  if (!tile) return;
+
+  const container = tile.querySelector(".houses-container");
+  container.innerHTML = ""; // clear previous houses/hotel
+
+  // Use TileDecorator's static methods 
+  if (hasHotel) {
+    TileDecorator.addHotel(tile);
+  } else if (houseCount > 0) {
+    TileDecorator.addHouses(tile, houseCount);
+  }
+
+}

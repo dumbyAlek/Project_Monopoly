@@ -13,6 +13,7 @@
       <p id="diceResult" class="result"></p>
     </div>
 
+
     <!-- Chance & Community Boxes (clickable) -->
     <div class="chance-box" id="chanceBox">Chance</div>
     <div class="community-box" id="communityBox">Community Chest</div>
