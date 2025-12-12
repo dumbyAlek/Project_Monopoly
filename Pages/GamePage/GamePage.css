@@ -1,6 +1,4 @@
-/* ==============================
-   General Body
-============================== */
+/* GamePage.css */
 body {
     margin: 0;
     font-family: 'Arial', sans-serif;
@@ -26,7 +24,7 @@ body {
 ============================== */
 .sidebar {
     width: 320px;
-    background-color: #84a98c;
+    background-color: #8795AB;
     color: #ecf0f1;
     padding: 20px;
     box-sizing: border-box;
@@ -96,7 +94,7 @@ body {
    Board Block Wrapper
 ============================== */
 .board-block {
-    background-color: #ffe3fb;
+    background-color: #D2C3D5;
     padding: 15px;
     border-radius: 12px;
     width: 100%;
@@ -208,7 +206,7 @@ body {
 
 /* Player Panels (dynamic) */
 .player-panel {
-    background-color: #2f3640;
+    background-color: #6A74A0;
     padding: 15px;
     border-radius: 10px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);

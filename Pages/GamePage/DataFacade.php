@@ -1,3 +1,5 @@
+<!-- DataFacade.php -->
+ 
 <?php
 class DataFacade {
     private $db;
@@ -24,7 +26,6 @@ class DataFacade {
             LEFT JOIN Wallet w ON p.player_id = w.player_id
             WHERE p.current_game_id = ?
             ORDER BY p.player_id ASC
-            LIMIT 4
         ");
         $stmt->bind_param("i", $this->gameId);
         $stmt->execute();

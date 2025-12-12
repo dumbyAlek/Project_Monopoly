@@ -1,13 +1,17 @@
-// Placeholder for future logic
+// GamePage,js
 console.log("GamePage loaded with mBoard included");
 
 // Example: update player money
 function updatePlayerMoney(playerIndex, amount) {
-    const players = document.querySelectorAll(".player-info p");
-    if (players[playerIndex]) {
-        players[playerIndex].textContent = `Player ${playerIndex+1}: $${amount}`;
+    const panel = document.querySelector(`.player-panel[data-pid="${playerIndex}"]`);
+    if (!panel) return;
+
+    const moneyEl = panel.querySelector(".money-value");
+    if (moneyEl) {
+        moneyEl.textContent = amount;
     }
 }
+
 
 function attachPlayerEvents() {
     const panels = document.querySelectorAll(".player-panel");

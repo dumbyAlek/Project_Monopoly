@@ -1,3 +1,5 @@
+// GameActionsProxy.js
+
 const GameActionsProxy = (() => {
     function getOutOfJail(playerPanel) {
         const btn = playerPanel.querySelector(".get-out-jail-btn");

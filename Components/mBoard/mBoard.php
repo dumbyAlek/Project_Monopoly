@@ -1,15 +1,8 @@
-<?php
-    // Placeholder for PHP logic (load players, bank, etc.)
-?>
+<!-- mBoard.php -->
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Monopoly Board</title>
+
   <link rel="stylesheet" href="../../Components/mBoard/mBoard.css">
-</head>
-<body>
+
 
   <div class="board" id="board">
     <!-- Dice Container -->
@@ -25,6 +18,4 @@
     <div class="community-box">Community Chest</div>
   </div>
 
-  <script type="module" src="../../Components/mBoard/mBoard.js"></script>
-</body>
-</html>
+<script type="module" src="../../Components/mBoard/mBoard.js"></script>

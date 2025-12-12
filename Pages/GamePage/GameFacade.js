@@ -1,4 +1,4 @@
-// Facade for internal data access
+// GameFacade.js
 
 const GameFacade = (() => {
     // Returns Bank Money
