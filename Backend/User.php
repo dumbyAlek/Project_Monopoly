@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../Database/Database.php';
+require_once __DIR__ . '/../Database/Database.php';
 
 function setUserSession(string $username) {
     $db = Database::getInstance()->getConnection();
