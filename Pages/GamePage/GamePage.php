@@ -1,3 +1,5 @@
+<!-- GamePage.php -->
+
 <?php
 session_start();
 require_once __DIR__ . '/../../Database/Database.php';
@@ -26,7 +28,6 @@ $players = $dataFacade->getPlayers();
     <div class="game-container">
     <!-- Left Sidebar: Bank -->
     <aside class="sidebar left-sidebar">
-        <h2>Bank</h2>
 
         <div class="bank-panel">
             <img src="../../Assets/counter1.webp" alt="Cash Counter" class="cash-counter">
@@ -57,11 +58,10 @@ $players = $dataFacade->getPlayers();
         </main>
 
             <aside class="sidebar right-sidebar">
-        <h2>Players</h2>
         <div class="players-container">
             <?php foreach($players as $p): ?>
                 <div class="player-panel" data-player-id="<?php echo $p['player_id']; ?>">
-                    <h3><?php echo htmlspecialchars($p['player_name']); ?> <img src="../../Assets/player-icon.png" alt="icon" class="player-icon"></h3>
+                    <!-- <h3><?php echo htmlspecialchars($p['player_name']); ?> <img src="../../Assets/player-icon.png" alt="icon" class="player-icon"></h3> -->
                     <p>Money: $<?php echo $p['money']; ?></p>
                     <p>Properties: <?php echo $p['number_of_properties']; ?> ($<?php echo $p['propertyWorthCash']; ?>)</p>
                     <p>Get Out of Jail Card: <?php echo $p['has_get_out_card'] ? "Yes" : "No"; ?></p>

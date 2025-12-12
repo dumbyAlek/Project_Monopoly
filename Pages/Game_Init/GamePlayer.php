@@ -1,6 +1,6 @@
 <?php
 // Player.php
-class Player {
+class GamePlayer {
     private $name;
     private $icon;
     private $order;

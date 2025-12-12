@@ -1,7 +1,6 @@
 // mBoard.js
 import { animateDice, diceFaces, getRandomPosition, mappingLabels , generateTiles} from './mBoardVisuals.js';
 
-const board = document.querySelector(".board");
 const rollBtn = document.getElementById("rollBtn");
 const diceResult = document.getElementById("diceResult");
 
@@ -59,5 +58,22 @@ export async function rollDice(mappingLabels) {
 }
 
 // Event listener
-initPlayers(mappingLabels);
 rollBtn.addEventListener("click", () => rollDice(mappingLabels));
+initPlayers(mappingLabels);
+// Add button event listeners for all tiles
+tiles.forEach((t, i) => {
+  const tileEl = document.getElementById(mappingLabels[i]);
+  const buyBtn = tileEl.querySelector(".buy-btn");
+  const sellBtn = tileEl.querySelector(".sell-btn");
+
+  if (buyBtn) buyBtn.addEventListener("click", () => {
+    console.log(`Player ${players[currentPlayerIndex].id} wants to BUY ${t.name}`);
+    // TODO: handle buy logic
+  });
+
+  if (sellBtn) sellBtn.addEventListener("click", () => {
+    console.log(`Player ${players[currentPlayerIndex].id} wants to SELL ${t.name}`);
+    // TODO: handle sell logic
+  });
+});
+

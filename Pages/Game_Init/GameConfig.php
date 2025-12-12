@@ -1,3 +1,4 @@
+<!-- GameConfig.php -->
 <?php
 class GameConfig {
     public $startingBankFund;
