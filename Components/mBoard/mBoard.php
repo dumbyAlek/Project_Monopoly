@@ -13,9 +13,16 @@
       <p id="diceResult" class="result"></p>
     </div>
 
-    <!-- Chance & Community Boxes -->
-    <div class="chance-box">Chance</div>
-    <div class="community-box">Community Chest</div>
+    <!-- Chance & Community Boxes (clickable) -->
+    <div class="chance-box" id="chanceBox">Chance</div>
+    <div class="community-box" id="communityBox">Community Chest</div>
+  </div>
+
+  <!-- ===== CARD MODAL HTML ===== -->
+  <div class="modal-overlay" id="cardModal" onclick="closeCard()">
+      <div class="card-modal" id="cardContent" onclick="event.stopPropagation()">
+          <!-- JS injects the card here -->
+      </div>
   </div>
 
 <script type="module" src="../../Components/mBoard/mBoard.js"></script>
