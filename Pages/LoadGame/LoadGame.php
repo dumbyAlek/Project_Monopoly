@@ -43,7 +43,7 @@ $result = $stmt->get_result();
             display: flex;
             justify-content: center;
             align-items: center;
-            background: url("../../Assets/bg.jpg") no-repeat center center/cover;
+            background: url("../../Assets/bg.webp") no-repeat center center/cover;
         }
 
         .container {
