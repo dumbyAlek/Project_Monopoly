@@ -3,12 +3,12 @@ export const board = document.querySelector(".board");
 
 // Dice faces
 export const diceFaces = [
-  "../../Assets/dice1.png",
-  "../../Assets/dice2.png",
-  "../../Assets/dice3.png",
-  "../../Assets/dice4.png",
-  "../../Assets/dice5.png",
-  "../../Assets/dice6.png"
+  "../../Assets/dice1.webp",
+  "../../Assets/dice2.webp",
+  "../../Assets/dice3.webp",
+  "../../Assets/dice4.webp",
+  "../../Assets/dice5.webp",
+  "../../Assets/dice6.webp"
 ];
 
 // Tiles setup

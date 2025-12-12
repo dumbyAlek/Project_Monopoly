@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS Bank (
 );
 
 
--- 6. WALLET (1–1 with Player)
+-- WALLET
 CREATE TABLE IF NOT EXISTS Wallet (
     player_id INT PRIMARY KEY,
     propertyWorthCash INT DEFAULT 0,
