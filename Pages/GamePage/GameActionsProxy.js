@@ -33,8 +33,17 @@ const GameActionsProxy = (() => {
     }
 
     // Buy property
-    async function buyProperty(playerPanel, propertyId, offerPrice = null) {
+    async function buyProperty(playerPanel, tileIndex, offerPrice = null) {
         const playerId = playerPanel.dataset.playerId;
+
+        // ✅ tileIndex -> real DB property_id
+        const meta = window.gameProperties?.[tileIndex];
+        if (!meta || !meta.id) {
+            alert("This tile is not a purchasable property.");
+            return;
+        }
+        const propertyId = meta.id;
+
 
         try {
             // Call backend to get property info (owner, price)
@@ -54,7 +63,7 @@ const GameActionsProxy = (() => {
             const result = await buyPropertyProxy(playerId, propertyId, prop.owner_id, offerPrice);
 
             if (result.success) {
-                updatePropertyUI(propertyId, result.owned, result.newBalance, playerPanel);
+                updatePropertyUI(tileIndex, result.owned, result.newBalance, playerPanel);
             } else {
                 alert(result.message || "Failed to buy property");
             }
@@ -68,10 +77,15 @@ const GameActionsProxy = (() => {
     }
 
     // Sell property
-    async function sellProperty(playerPanel, propertyId, sellPrice = null) {
+    async function sellProperty(playerPanel, tileIndex, sellPrice = null) {
         const playerId = playerPanel.dataset.playerId;
 
-        
+        const meta = window.gameProperties?.[tileIndex];
+        if (!meta || !meta.id) {
+            alert("This tile is not a sellable property.");
+            return;
+        }
+        const propertyId = meta.id;
 
         try {
 
@@ -98,7 +112,7 @@ const GameActionsProxy = (() => {
             const result = await sellPropertyProxy(playerId, propertyId, prop.owner_id, sellPrice);
 
             if (result.success) {
-                updatePropertyUI(propertyId, result.owned, result.newBalance, playerPanel);
+                updatePropertyUI(tileIndex, result.owned, result.newBalance, playerPanel);
             } else {
                 alert(result.message || "Cannot sell property");
             }
@@ -111,19 +125,18 @@ const GameActionsProxy = (() => {
         }
     }
 
-    function updatePropertyUI(propertyId, owned, newBalance, playerPanel) {
-        if (newBalance !== undefined) {
-            playerPanel.querySelector(".money-value").textContent = newBalance;
-        }
-
-        const tileId = window.mappingLabels[propertyId];
-        const buyBtn = document.querySelector(`#${tileId} .buy-btn`);
-        const sellBtn = document.querySelector(`#${tileId} .sell-btn`);
-
-        if (buyBtn) buyBtn.disabled = owned;
-        if (sellBtn) sellBtn.disabled = !owned;
+    function updatePropertyUI(tileIndex, owned, newBalance, playerPanel) {
+    if (newBalance !== undefined) {
+        playerPanel.querySelector(".money-value").textContent = newBalance;
     }
 
+    const tileId = window.mappingLabels[tileIndex];
+    const buyBtn = document.querySelector(`#${tileId} .buy-btn`);
+    const sellBtn = document.querySelector(`#${tileId} .sell-btn`);
+
+    if (buyBtn) buyBtn.disabled = owned;
+    if (sellBtn) sellBtn.disabled = !owned;
+    }
 
     return {
         getOutOfJail,

@@ -34,17 +34,17 @@ class DataFacade {
     }
 
     private array $propertyToTileMap = [
-        // Monopoly standard layout (example – adjust to YOUR board)
-        1  => 1,   // Mediterranean Ave
-        2  => 3,   // Baltic Ave
-        3  => 5,   // Reading Railroad
-        4  => 6,   // Oriental Ave
-        5  => 8,   // Vermont Ave
-        6  => 9,   // Connecticut Ave
-        7  => 11,  // St. Charles Place
-        8  => 12,  // Electric Company
-        9  => 13,  // States Ave
-        10 => 14,  // Virginia Ave
+        1  => 1,
+        2  => 3,
+        3  => 5,
+        4  => 6,
+        5  => 8, 
+        6  => 9,
+        7  => 11,
+        8  => 12,
+        9  => 13,
+        10 => 14,
+
         // continue...
     ];
 
