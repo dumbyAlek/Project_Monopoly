@@ -71,7 +71,9 @@ CREATE TABLE IF NOT EXISTS Property (
     hotel_count INT DEFAULT 0,
     is_mortgaged BOOLEAN DEFAULT FALSE,
     owner_id INT NULL,
-    FOREIGN KEY (owner_id) REFERENCES Player(player_id)
+    current_game_id INT,
+    FOREIGN KEY (owner_id) REFERENCES Player(player_id),
+    FOREIGN KEY (current_game_id) REFERENCES Game(game_id)
 );
 
 -- BANK TRANSACTIONS
@@ -107,11 +109,3 @@ CREATE TABLE IF NOT EXISTS Log (
     timestamp DATETIME NOT NULL,
     FOREIGN KEY (game_id) REFERENCES Game(game_id)
 );
-
--- CREATE TABLE IF NOT EXISTS BoardTile (
---     tile_id INT AUTO_INCREMENT PRIMARY KEY,
---     position INT NOT NULL UNIQUE,   -- 0–39
---     type ENUM('property','chance','community','tax','go','jail','free_parking','go_to_jail') NOT NULL,
---     property_id INT NULL,
---     FOREIGN KEY (property_id) REFERENCES Property(property_id)
--- );

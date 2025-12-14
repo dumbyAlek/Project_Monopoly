@@ -682,3 +682,21 @@ button:hover {
   padding: 1px;
   background: #eee;
 }
+
+.hidden {
+  display: none;
+}
+
+.transparent {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.dice-container button {
+  width: 200px;
+  margin-top: 10px;
+}
+
+#endTurnBtn {
+  background-color: #27ae60;
+}

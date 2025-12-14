@@ -9,7 +9,10 @@
     <div class="dice-container dice-area">
       <div class="dice" id="dice1">🎲</div>
       <div class="dice" id="dice2">🎲</div>
+
       <button id="rollBtn">Roll Dice</button>
+      <button id="endTurnBtn" class="hidden">End Turn</button>
+      
       <p id="diceResult" class="result"></p>
     </div>
 
@@ -25,5 +28,6 @@
           <!-- JS injects the card here -->
       </div>
   </div>
+  
 
 <script type="module" src="../../Components/mBoard/mBoard.js"></script>

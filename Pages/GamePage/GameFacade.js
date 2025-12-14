@@ -3,8 +3,8 @@
 const GameFacade = (() => {
     // Returns Bank Money
     function getBankStatus() {
-        const bankMoney = document.querySelector(".bank-money").textContent.match(/\$(\d+)/)[1];
-        return { totalFunds: parseInt(bankMoney) };
+        const bankMoneyEl = document.querySelector(".bank-total-funds"); // add this class in HTML
+        return { totalFunds: parseInt(bankMoneyEl.textContent.replace(/\$/,'')) };
     }
 
     function getPlayersStatus() {
@@ -13,13 +13,13 @@ const GameFacade = (() => {
         panels.forEach(p => {
             players.push({
                 playerId: p.dataset.playerId,
-                money: parseInt(p.querySelector("p:nth-child(2)").textContent.match(/\$(\d+)/)[1]),
-                propertiesCount: parseInt(p.querySelector("p:nth-child(3)").textContent),
-                propertiesWorth: parseInt(p.querySelector("p:nth-child(3)").textContent.match(/\$(\d+)/)[1]),
-                inJail: !p.querySelector(".get-out-jail-btn").disabled,
-                hasGetOutCard: p.querySelector("p:nth-child(4)").textContent.includes("Yes"),
-                debtToPlayers: parseInt(p.querySelector("p:nth-child(6)").textContent.match(/\$(\d+)/)[1]),
-                debtFromPlayers: parseInt(p.querySelector("p:nth-child(5)").textContent.match(/\$(\d+)/)[1]),
+                money: parseInt(p.querySelector(".player-money").textContent.replace(/\$/,'')),
+                propertiesCount: parseInt(p.querySelector(".player-properties-count").textContent),
+                propertiesWorth: parseInt(p.querySelector(".player-properties-worth").textContent.replace(/\$/,'')),
+                inJail: p.querySelector(".get-out-jail-btn").disabled, // fixed logic
+                hasGetOutCard: p.querySelector(".player-get-out-card").textContent.includes("Yes"),
+                debtToPlayers: parseInt(p.querySelector(".player-debt-to").textContent.replace(/\$/,'')),
+                debtFromPlayers: parseInt(p.querySelector(".player-debt-from").textContent.replace(/\$/,'')),
             });
         });
         return players;
@@ -30,7 +30,7 @@ const GameFacade = (() => {
         const playersStatus = getPlayersStatus();
 
         try {
-            const response = await fetch('/../../Backend/saveGame.php', {
+            const response = await fetch('../../Backend/saveGame.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -54,3 +54,16 @@ const GameFacade = (() => {
 
     return { getBankStatus, getPlayersStatus, saveGame };
 })();
+
+// function resetGameStatus() {
+//     document.querySelectorAll(".player-panel").forEach(p => {
+//         p.querySelector(".player-money").textContent = "$0";
+//         p.querySelector(".player-properties-count").textContent = "0";
+//         p.querySelector(".player-properties-worth").textContent = "$0";
+//         p.querySelector(".get-out-jail-btn").disabled = false;
+//         p.querySelector(".player-get-out-card").textContent = "No";
+//         p.querySelector(".player-debt-to").textContent = "$0";
+//         p.querySelector(".player-debt-from").textContent = "$0";
+//     });
+//     document.querySelector(".bank-total-funds").textContent = "$0";
+// }

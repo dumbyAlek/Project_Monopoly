@@ -24,6 +24,21 @@ for ($i = 0; $i < 4; $i++) {
     if ($names[$i] === '') $names[$i] = 'Player ' . ($i+1);
 }
 
+$BOARD_PROPERTIES = [
+    // tile_index => property data
+    1  => ['price' => 60,  'rent' => 2],
+    3  => ['price' => 60,  'rent' => 4],
+    5  => ['price' => 200, 'rent' => 25], // railroad
+    6  => ['price' => 100, 'rent' => 6],
+    8  => ['price' => 100, 'rent' => 6],
+    9  => ['price' => 120, 'rent' => 8],
+    11 => ['price' => 140, 'rent' => 10],
+    12 => ['price' => 150, 'rent' => 10], // utility
+    13 => ['price' => 140, 'rent' => 10],
+    14 => ['price' => 160, 'rent' => 12],
+    // continue for your board
+];
+
 // Icons fixed by slot order
 $icons = ["🏰","🚗","🛵","🎩"];
 
@@ -45,15 +60,19 @@ $config = $builder->build();
 $user_id = isset($_SESSION['user_id']) ? intval($_SESSION['user_id']) : null;
 
 if ($user_id === null) {
-    $stmt = $db->prepare("INSERT INTO Game (user_id, start_time, last_saved_time, passing_GO, status, current_turn, save_file_path)
-                          VALUES (NULL, NOW(), NOW(), ?, 'ongoing', 1, NULL)");
+    $stmt = $db->prepare(
+        "INSERT INTO Game (user_id, start_time, last_saved_time, passing_GO, status)
+        VALUES (?, NOW(), NOW(), ?, 'ongoing')"
+    );
     if (!$stmt) die("Prepare failed (Game NULL user): " . $db->error);
     $stmt->bind_param("i", $passGoMoney);
 } else {
-    $stmt = $db->prepare("INSERT INTO Game (user_id, start_time, last_saved_time, passing_GO, status, current_turn, save_file_path)
-                          VALUES (?, NOW(), NOW(), ?, 'ongoing', 1, NULL)");
+    $stmt = $db->prepare(
+        "INSERT INTO Game (user_id, start_time, last_saved_time, passing_GO, status)
+        VALUES (NULL, NOW(), NOW(), ?, 'ongoing')"
+    );
     if (!$stmt) die("Prepare failed (Game): " . $db->error);
-    $stmt->bind_param("ii", $user_id, $passGoMoney);
+    $stmt->bind_param("i", $passGoMoney);
 }
 
 if (!$stmt->execute()) die("Game insert failed: " . $stmt->error);
@@ -87,6 +106,40 @@ foreach ($names as $i => $pname) {
     $insWallet->bind_param("i", $player_id);
     if (!$insWallet->execute()) die("Wallet insert failed: " . $insWallet->error);
 }
+
+// =====================
+// Insert Places
+// =====================
+$propStmt = $db->prepare("
+    INSERT INTO Property (price, rent, house_count, hotel_count, is_mortgaged, owner_id, current_game_id)
+    VALUES (?, ?, 0, 0, 0, NULL, ?)
+");
+
+if (!$propStmt) die("Prepare failed (Property): " . $db->error);
+
+foreach ($BOARD_PROPERTIES as $tileIndex => $prop) {
+    $propStmt->bind_param(
+        "iii",
+        $prop['price'],
+        $prop['rent'],
+        $game_id
+    );
+
+    if (!$propStmt->execute()) {
+        die("Property insert failed: " . $propStmt->error);
+    }
+
+    // IMPORTANT: store tile_index → property_id mapping in memory
+    $propertyId = $propStmt->insert_id;
+
+    // Optional: keep this if you want to log/debug
+    // error_log("Tile $tileIndex => Property $propertyId");
+}
+
+$propStmt->close();
+
+
+
 
 $insPlayer->close();
 $insWallet->close();
