@@ -29,23 +29,24 @@ if ($stmt = $con->prepare("SELECT user_id FROM User WHERE username = ? LIMIT 1")
 
 // If player_id found, fetch the most recent SaveFile row (join to Game for some metadata)
 if ($player_id !== null) {
-    $sql = "SELECT sf.save_id, sf.file_path, sf.saved_time, g.game_id, g.status
-            FROM SaveFile sf
-            JOIN Game g ON sf.game_id = g.game_id
-            WHERE sf.player_id = ?
-            ORDER BY sf.saved_time DESC
+    $sql = "SELECT 
+                g.game_id,
+                g.last_saved_time,
+                g.status
+            FROM Game g
+            WHERE g.user_id = ?
+              AND g.last_saved_time IS NOT NULL
+            ORDER BY g.last_saved_time DESC
             LIMIT 1";
     if ($stmt = $con->prepare($sql)) {
         $stmt->bind_param("i", $player_id);
         if ($stmt->execute()) {
-            $stmt->bind_result($save_id, $file_path, $saved_time, $game_id, $game_status);
+            $stmt->bind_result($game_id, $saved_time, $game_status);
             if ($stmt->fetch()) {
                 $lastSave = [
-                    'save_id'    => $save_id,
-                    'file_path'  => $file_path,
-                    'saved_time' => $saved_time,
-                    'game_id'    => $game_id,
-                    'status'     => $game_status
+                  'game_id'    => $game_id,
+                  'saved_time' => $saved_time,
+                  'status'     => $game_status
                 ];
             }
         }
@@ -80,7 +81,7 @@ if ($player_id !== null) {
 
         <?php if ($lastSave): ?>
           <form method="get" action="../LoadGame/LoadGame.php" style="margin:0;">
-            <input type="hidden" name="save_id" value="<?= (int)$lastSave['save_id'] ?>">
+            <input type="hidden" name="game_id" value="<?= (int)$lastSave['game_id'] ?>">
             <button type="submit" class="btn" id="resumeBtn">Continue Last Saved Game</button>
             <div class="meta small">Last saved: <?= htmlspecialchars($lastSave['saved_time']) ?> — status: <?= htmlspecialchars($lastSave['status']) ?></div>
           </form>

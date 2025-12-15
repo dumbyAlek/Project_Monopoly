@@ -1,6 +1,6 @@
 <!-- GameConfigBuilder.php -->
 <?php
-require_once 'Player.php';
+require_once 'GamePlayer.php';
 require_once 'GameConfig.php';
 
 class GameConfigBuilder {
@@ -24,7 +24,7 @@ class GameConfigBuilder {
         return $this;
     }
 
-    public function addPlayer(Player $p) {
+    public function addPlayer(GamePlayer $p) {
         $this->players[] = $p;
         return $this;
     }
