@@ -115,7 +115,6 @@ const GameFacade = (() => {
     }
   }
 
-  // ✅ call once when page loads
   function enableAutosave(gameId) {
     // pagehide fires on reload + tab close + navigation (better than beforeunload)
     window.addEventListener("pagehide", () => saveGameBeacon(gameId));
