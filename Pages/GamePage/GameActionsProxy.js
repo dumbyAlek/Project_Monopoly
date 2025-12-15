@@ -36,7 +36,6 @@ const GameActionsProxy = (() => {
     async function buyProperty(playerPanel, tileIndex, offerPrice = null) {
         const playerId = playerPanel.dataset.playerId;
 
-        // ✅ tileIndex -> real DB property_id
         const meta = window.gameProperties?.[tileIndex];
         if (!meta || !meta.id) {
             alert("This tile is not a purchasable property.");
@@ -83,45 +82,78 @@ const GameActionsProxy = (() => {
 
     // Sell property
     async function sellProperty(playerPanel, tileIndex) {
-    const playerId = playerPanel.dataset.playerId;
+        const playerId = playerPanel.dataset.playerId;
 
-    const meta = window.gameProperties?.[tileIndex];
-    if (!meta || !meta.id) {
-        alert("This tile is not a sellable property.");
-        return;
-    }
-
-    const propertyId = meta.id;
-    const propertyName = meta.name || meta.property_name || ""; // whichever you store
-
-    try {
-        const res = await fetch('../../Backend/GameActions/checkPropertyStatus.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ propertyId, gameId: window.currentGameId ?? currentGameId })
-        });
-
-        const prop = await res.json();
-        if (!prop.success) {
-        alert(prop.message || "Cannot fetch property info");
-        return;
+        const meta = window.gameProperties?.[tileIndex];
+        if (!meta || !meta.id) {
+            alert("This tile is not a sellable property.");
+            return;
         }
 
-        if (String(playerId) !== String(prop.owner_id)) {
-        alert("You do not own this property.");
-        return;
+        const propertyId = meta.id;
+        const propertyName = meta.name || meta.property_name || ""; // whichever you store
+
+        try {
+            const res = await fetch('../../Backend/GameActions/checkPropertyStatus.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ propertyId, gameId: window.currentGameId ?? currentGameId })
+            });
+
+            const prop = await res.json();
+            if (!prop.success) {
+            alert(prop.message || "Cannot fetch property info");
+            return;
+            }
+
+            if (String(playerId) !== String(prop.owner_id)) {
+            alert("You do not own this property.");
+            return;
+            }
+
+            const owner = { id: Number(playerId), name: getPlayerNameById(playerId) };
+            window.openSellTradeModal(owner, propertyId, propertyName, tileIndex);
+
+        } catch (err) {
+            console.error(err);
+            alert("Error selling property");
+        }
+    }
+
+    // Place house or hotel
+    async function placeHouseOrHotel(playerPanel, tileIndex, houseCount, hasHotel) {
+        const playerId = playerPanel.dataset.playerId;
+
+        const meta = window.gameProperties?.[tileIndex];
+        if (!meta || !meta.id) {
+            alert("This tile is not a valid property.");
+            return;
         }
 
-        const owner = { id: Number(playerId), name: getPlayerNameById(playerId) };
-        window.openSellTradeModal(owner, propertyId, propertyName, tileIndex);
+        const propertyId = meta.id;
 
-    } catch (err) {
-        console.error(err);
-        alert("Error selling property");
-    }
+        try {
+            const res = await fetch('../../Backend/GameActions/PlaceHouseOrHotel.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    gameId: Number(window.currentGameId ?? 0),
+                    playerId: Number(playerId),
+                    propertyId: Number(propertyId),
+                    tileIndex: Number(tileIndex)   // 👈 needed for cost
+                })
+            });
+
+            const result = await res.json();
+            return result;
+
+        } catch (err) {
+            console.error(err);
+            alert("Error placing house/hotel");
+            return { success: false };
+        }
     }
 
-    // Executes sale after modal choice
     async function confirmSellProperty(playerPanel, tileIndex, mode, buyerId = null, sellPrice = null) {
     const playerId = playerPanel.dataset.playerId;
 
@@ -184,7 +216,8 @@ const GameActionsProxy = (() => {
         getOutOfJail,
         buyProperty,
         sellProperty,
-        confirmSellProperty
+        confirmSellProperty,
+        placeHouseOrHotel
     };
 })();
 
