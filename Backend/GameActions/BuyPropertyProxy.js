@@ -1,4 +1,3 @@
-// BuyPropertyProxy.js
 export const buyPropertyProxy = async (buyerId, propertyId, ownerId = null, offerPrice = null) => {
     try {
         let url = '';
@@ -6,11 +5,6 @@ export const buyPropertyProxy = async (buyerId, propertyId, ownerId = null, offe
         playerId: Number(buyerId),
         propertyId: Number(propertyId)
         };
-        // let payload = {
-        // playerId: buyerId,
-        // propertyId: propertyId
-        // };
-
 
         if (ownerId === null) {
             // Property is unowned → buy from bank

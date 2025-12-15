@@ -1,5 +1,3 @@
-<!-- DataFacade.php -->
- 
 <?php
 class DataFacade {
     private $db;

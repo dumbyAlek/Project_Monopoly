@@ -1,5 +1,6 @@
 <?php
 require_once "../../Database/Database.php";
+header('Content-Type: application/json');
 
 $db = Database::getInstance()->getConnection();
 $data = json_decode(file_get_contents("php://input"), true);
@@ -8,9 +9,15 @@ $owner_id   = (int)$data['owner_id'];
 $buyer_id   = (int)$data['buyer_id'];
 $property_id = (int)$data['property_id'];
 $price      = (int)$data['price'];
+if ($buyer_id === $owner_id) {
+    throw new Exception("Buyer cannot be the seller.");
+}
+
 
 try {
     $db->begin_transaction();
+
+    $gameIdClient = (int)($data['gameId'] ?? 0);
 
     // Lock buyer
     $buyerStmt = $db->prepare("SELECT money, current_game_id FROM Player WHERE player_id = ? FOR UPDATE");
@@ -23,13 +30,29 @@ try {
     $buyerMoney = (int)$buyerRow['money'];
     $gameId = (int)$buyerRow['current_game_id'];
 
+    if ($gameIdClient && $gameIdClient !== $gameId) {
+        throw new Exception("Game mismatch.");
+    }
+
+    // Lock seller
+    $sellerStmt = $db->prepare("SELECT money, current_game_id FROM Player WHERE player_id = ? FOR UPDATE");
+    $sellerStmt->bind_param("i", $owner_id);
+    $sellerStmt->execute();
+    $sellerRow = $sellerStmt->get_result()->fetch_assoc();
+    $sellerStmt->close();
+
+    if (!$sellerRow) throw new Exception("Seller not found.");
+    if ((int)$sellerRow['current_game_id'] !== $gameId) {
+        throw new Exception("Players are not in the same game.");
+    }
+
     if ($buyerMoney < $price) {
         throw new Exception("Buyer does not have enough money.");
     }
 
     // Lock property
     $propStmt = $db->prepare("
-        SELECT owner_id, current_game_id, price
+        SELECT owner_id, price
         FROM Property
         WHERE property_id = ? AND current_game_id = ?
         FOR UPDATE
@@ -102,14 +125,16 @@ try {
 
     $db->commit();
 
-
-    $newBalance = $buyerMoney - $price;
+    $buyerNewBalance  = $buyerMoney - $price;
+    $sellerNewBalance = ((int)$sellerRow['money']) + $price;
 
     echo json_encode([
-        "success" => true,
-        "newBalance" => $newBalance
+    "success" => true,
+    "message" => "Property sold successfully.",
+    "buyerNewBalance" => $buyerNewBalance,
+    "sellerNewBalance" => $sellerNewBalance,
+    "newOwnerId" => $buyer_id
     ]);
-
 
 } catch (Exception $e) {
     $db->rollback();
@@ -118,3 +143,4 @@ try {
         "message" => $e->getMessage()
     ]);
 }
+exit;
