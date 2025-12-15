@@ -1,9 +1,7 @@
-<!-- GamePage.php -->
-
 <?php
 session_start();
 require_once __DIR__ . '/../../Database/Database.php';
-require_once __DIR__ . '/DataFacade.php'; // include the new DataFacade
+require_once __DIR__ . '/DataFacade.php';
 
 $db = Database::getInstance()->getConnection();
 $currentGameId = $_GET['game_id'] ?? 1;
@@ -35,6 +33,7 @@ $properties = $dataFacade->getProperties();
             "is_in_jail" => (bool)$p["is_in_jail"],
             "has_get_out_card" => (bool)$p["has_get_out_card"]
         ], $players)); ?>;
+        window.gameProperties = <?php echo json_encode($properties ?? [], JSON_UNESCAPED_UNICODE); ?>;
     </script>
     <div class="game-container">
     <!-- Left Sidebar: Bank -->
@@ -110,45 +109,56 @@ $properties = $dataFacade->getProperties();
 
     <!-- SELL PROPERTY TO PLAYER MODAL -->
     <div id="sellTradeModal" class="modal" style="display:none;">
-        <div class="modal-content">
+    <div class="modal-content">
+        <h3 id="sellModalTitle">Sell Property</h3>
 
-            <h3>Sell Property</h3>
-
-            <!-- OWNER VIEW -->
-            <div id="sellerView">
-                <p><strong>Owner:</strong> <span id="sellerName"></span></p>
-
-                <label>Asking Price</label>
-                <input type="number" id="askingPrice" min="1" required />
-
-                <div class="modal-actions">
-                    <button id="proceedToBuyerBtn" disabled>Proceed</button>
-                    <button onclick="closeSellTradeModal()">Cancel</button>
-                </div>
+        <!-- STEP 1: OPTIONS -->
+        <div id="sellOptionsView">
+            <p id="sellPropertyLabel"></p>
+            <div class="modal-actions">
+                <button id="sellToBankBtn">Sell to Bank</button>
+                <button id="sellToPlayerBtn">Sell to Player</button>
+                <button onclick="closeSellTradeModal()">Cancel</button>
             </div>
+        </div>
 
-            <!-- BUYER VIEW -->
-            <div id="buyerConfirmView" style="display:none;">
-                <p><strong>Buyer:</strong> <span id="buyerConfirmName"></span></p>
-                <p>
-                    Asking Price:
-                    <strong>$<span id="finalPrice"></span></strong>
-                </p>
+        <!-- STEP 2: SELL TO PLAYER FORM -->
+        <div id="sellToPlayerFormView" style="display:none;">
+            <p><strong>Owner:</strong> <span id="sellerName"></span></p>
+            <label>Asking Price</label>
+            <input type="number" id="askingPrice" min="1" />
+            <label>Choose Player</label>
+            <select id="sellBuyerSelect">
+                <option value="">-- Select buyer --</option>
+            </select>
 
-                <div class="modal-actions">
-                    <button id="acceptSellBtn">Accept</button>
-                    <button id="declineSellBtn">Decline</button>
-                </div>
+        <div class="modal-actions">
+            <button id="proceedToBuyerBtn" disabled>Proceed</button>
+            <button id="backToSellOptionsBtn">Back</button>
+            <button onclick="closeSellTradeModal()">Cancel</button>
+        </div>
+        </div>
+
+        <!-- BUYER CONFIRM VIEW (keep) -->
+        <div id="buyerConfirmView" style="display:none;">
+            <p><strong>Buyer:</strong> <span id="buyerConfirmName"></span></p>
+            <p>Asking Price: <strong>$<span id="finalPrice"></span></strong></p>
+
+            <div class="modal-actions">
+                <button id="acceptSellBtn">Accept</button>
+                <button id="declineSellBtn">Decline</button>
             </div>
+        </div>
 
-            <!-- RESULT -->
-            <div id="sellResultView" style="display:none;">
-                <p id="sellResultMessage"></p>
-                <button onclick="closeSellTradeModal()">Close</button>
-            </div>
 
+        <!-- RESULT (keep) -->
+        <div id="sellResultView" style="display:none;">
+        <p id="sellResultMessage"></p>
+        <button onclick="closeSellTradeModal()">Close</button>
         </div>
     </div>
+    </div>
+
 
     <aside class="sidebar right-sidebar">
         <div class="players-container">
@@ -160,10 +170,10 @@ $properties = $dataFacade->getProperties();
                     <p>Get Out of Jail Card: <?php echo $p['has_get_out_card'] ? "Yes" : "No"; ?></p>
                     <p>Loan: $0 <button class="pay-loan-btn">Pay</button></p>
                     <p>Debt from Players: $<?php echo $p['debt_from_players']; ?></p>
-                    <!-- <p>Debt to Players: $<?php echo $p['debt_to_players']; ?> 
+                     $<?php echo $p['debt_to_players']; ?> 
                         <button class="pay-debt-btn">Pay</button> 
                         <button class="ask-debt-btn">Ask</button>
-                    </p> -->
+                    </p>
                     <button class="get-out-jail-btn" <?php echo $p['is_in_jail'] ? '' : 'disabled'; ?>>Get Out of Jail</button>
                 </div>
             <?php endforeach; ?>
@@ -179,10 +189,5 @@ $properties = $dataFacade->getProperties();
     <script src="GameFacade.js"></script>
     <script type="module" src="GameActionsProxy.js"></script>
     <script src="GamePage.js"></script>
-    <script>
-        window.gameProperties = <?php echo json_encode($properties ?? [], JSON_UNESCAPED_UNICODE); ?>;
-        console.log(window.gameProperties);
-    </script>
-    window.openTradeModal = openTradeModal;
 </body>
 </html>

@@ -53,6 +53,13 @@ if (players.length === 0) {
 
 let currentPlayerIndex = 0;
 let turnLocked = false;  // prevents advancing turn until actions are done
+function anyModalOpen() {
+  const sellOpen = document.getElementById("sellTradeModal")?.style.display === "block";
+  const tradeOpen = document.getElementById("tradeModal")?.style.display === "block";
+  const cardOpen = document.getElementById("cardModal")?.classList?.contains("active"); // if you use this
+  return sellOpen || tradeOpen || cardOpen;
+}
+
 
 async function loadCurrentTurnFromServer() {
   try {
@@ -226,8 +233,9 @@ function enableTileActions(tileIndex) {
 }
 
 if (endTurnBtn) {
-  endTurnBtn.addEventListener("click", () => {
-    if (!turnLocked) return;
+    endTurnBtn.addEventListener("click", () => {
+      if (!turnLocked) return;
+      if (anyModalOpen()) return; // don't allow ending turn mid-transaction
 
     turnLocked = false;
 
