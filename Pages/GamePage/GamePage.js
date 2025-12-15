@@ -8,20 +8,25 @@ function updatePlayerMoney(playerIndex, amount) {
     const moneyEl = panel.querySelector(".money-value");
     if (moneyEl) moneyEl.textContent = amount;
 }
+window.updatePlayerMoney = updatePlayerMoney;
 
 
 function attachPlayerEvents() {
-    const panels = document.querySelectorAll(".player-panel");
-    panels.forEach(p => {
-        p.querySelector(".get-out-jail-btn").onclick = () => GameActionsProxy.getOutOfJail(p);
-        p.querySelector(".pay-loan-btn").onclick = () => {
-            const amount = parseInt(prompt("Enter loan amount:"));
-            if (!isNaN(amount) && amount > 0) GameActionsProxy.payLoan(p, amount);
-        }
-        // p.querySelector(".pay-debt-btn").onclick = () => GameActionsProxy.payDebt(p);
-        // p.querySelector(".ask-debt-btn").onclick = () => GameActionsProxy.askDebt(p);
-    });
+  const panels = document.querySelectorAll(".player-panel");
+  panels.forEach(p => {
+    const jailBtn = p.querySelector(".get-out-jail-btn");
+    if (jailBtn) jailBtn.onclick = () => GameActionsProxy.getOutOfJail(p);
+
+    const payLoanBtn = p.querySelector(".pay-loan-btn");
+    if (payLoanBtn) {
+      payLoanBtn.onclick = () => {
+        const amount = parseInt(prompt("Enter loan amount:"));
+        if (!isNaN(amount) && amount > 0) GameActionsProxy.payLoan(p, amount);
+      };
+    }
+  });
 }
+
 
 const saveBtn = document.getElementById("save-game-btn");
 if (saveBtn) {
@@ -30,21 +35,23 @@ if (saveBtn) {
 
 
 // Initial attach
-attachPlayerEvents();
-GameFacade.enableAutosave(currentGameId);
+window.addEventListener("DOMContentLoaded", () => {
+  attachPlayerEvents();
+  GameFacade.enableAutosave(currentGameId);
+});
 
 // ========================================== Buying from Player ==============================================================
 
-let tradeData = {};
+window.tradeData = window.tradeData || {};
 
 function openTradeModal(buyer, owner, tileIndex) {
-    tradeData = {
-        buyer_id: buyer.id,
-        buyer_name: buyer.name,
-        owner_id: owner.id,
-        owner_name: owner.name,
-        tile_index: tileIndex,
-        offer: null
+    window.tradeData = {
+      buyer_id: buyer.id,
+      buyer_name: buyer.name,
+      owner_id: owner.id,
+      owner_name: owner.name,
+      tile_index: tileIndex,
+      offer: null
     };
 
     document.getElementById("buyerName").innerText = buyer.name;
@@ -63,7 +70,7 @@ document.getElementById("offerAmount").addEventListener("input", function () {
 });
 
 document.getElementById("proceedBtn").onclick = () => {
-    tradeData.offer = Number(document.getElementById("offerAmount").value);
+    window.tradeData.offer = Number(document.getElementById("offerAmount").value);
 
     document.getElementById("buyerView").style.display = "none";
     document.getElementById("ownerView").style.display = "block";
@@ -78,14 +85,14 @@ document.getElementById("declineTradeBtn").onclick = () => {
 };
 
 document.getElementById("acceptTradeBtn").onclick = async () => {
-    const offer = Number(tradeData.offer);
+    const offer = Number(window.tradeData.offer);
     if (!offer || offer <= 0) return alert("Invalid offer");
 
-    const buyerPanel = document.querySelector(`.player-panel[data-player-id="${tradeData.buyer_id}"]`);
+    const buyerPanel = document.querySelector(`.player-panel[data-player-id="${window.tradeData.buyer_id}"]`);
     if (!buyerPanel) return alert("Buyer panel not found");
 
     // This goes through: GameActionsProxy -> checkPropertyStatus -> BuyPropertyProxy -> buyOwnedProperty.php
-    const result = await window.GameActionsProxy.buyProperty(buyerPanel, tradeData.tile_index, offer);
+    const result = await window.GameActionsProxy.buyProperty(buyerPanel, window.tradeData.tile_index, offer);
 
     document.getElementById("ownerView").style.display = "none";
     document.getElementById("resultView").style.display = "block";
@@ -104,8 +111,6 @@ function closeTradeModal() {
 }
 
 // ========================================== Selling to Player ==============================================================
-
-window.addEventListener("DOMContentLoaded", () => {
 let sellTradeData = {};
 
 function openSellTradeModal(owner, propertyId, propertyName = "", tileIndex = null) {
@@ -165,119 +170,122 @@ function openSellTradeModal(owner, propertyId, propertyName = "", tileIndex = nu
   document.getElementById("sellTradeModal").style.display = "block";
 }
 
-document.getElementById("sellToPlayerBtn").onclick = () => {
-  document.getElementById("sellOptionsView").style.display = "none";
-  document.getElementById("sellToPlayerFormView").style.display = "block";
-};
 
-document.getElementById("backToSellOptionsBtn").onclick = () => {
-  document.getElementById("sellToPlayerFormView").style.display = "none";
-  document.getElementById("sellOptionsView").style.display = "block";
-};
+  window.addEventListener("DOMContentLoaded", () => {
 
+  document.getElementById("sellToPlayerBtn").onclick = () => {
+    document.getElementById("sellOptionsView").style.display = "none";
+    document.getElementById("sellToPlayerFormView").style.display = "block";
+  };
 
-
-function canProceedSellToPlayer() {
-  const price = Number(document.getElementById("askingPrice").value);
-  const buyerId = document.getElementById("sellBuyerSelect").value;
-  return price > 0 && buyerId;
-}
-
-document.getElementById("askingPrice").addEventListener("input", () => {
-  document.getElementById("proceedToBuyerBtn").disabled = !canProceedSellToPlayer();
-});
-
-document.getElementById("sellBuyerSelect").addEventListener("change", () => {
-  document.getElementById("proceedToBuyerBtn").disabled = !canProceedSellToPlayer();
-});
+  document.getElementById("backToSellOptionsBtn").onclick = () => {
+    document.getElementById("sellToPlayerFormView").style.display = "none";
+    document.getElementById("sellOptionsView").style.display = "block";
+  };
 
 
-document.getElementById("proceedToBuyerBtn").onclick = () => {
-  const price = Number(document.getElementById("askingPrice").value);
-  const buyerId = Number(document.getElementById("sellBuyerSelect").value);
 
-  const buyerObj = (window.playersData || []).find(p => Number(p.player_id) === buyerId);
-  if (!buyerObj) return alert("Invalid buyer selected");
-
-  sellTradeData.price = price;
-  sellTradeData.buyer_id = buyerId;
-  sellTradeData.buyer_name = buyerObj.name;
-
-  document.getElementById("finalPrice").innerText = price;
-  document.getElementById("buyerConfirmName").innerText = buyerObj.name;
-
-  document.getElementById("sellToPlayerFormView").style.display = "none";
-  document.getElementById("buyerConfirmView").style.display = "block";
-};
-
-
-document.getElementById("declineSellBtn").onclick = () => {
-    document.getElementById("buyerConfirmView").style.display = "none";
-    document.getElementById("sellResultView").style.display = "block";
-    document.getElementById("sellResultMessage").innerText =
-        "❌ Buyer declined the offer.";
-};
-
-document.getElementById("acceptSellBtn").onclick = async () => {
-  const ownerPanel = document.querySelector(`.player-panel[data-player-id="${sellTradeData.owner_id}"]`);
-  if (!ownerPanel) return alert("Owner panel not found");
-
-  const res = await window.GameActionsProxy.confirmSellProperty(
-    ownerPanel,
-    sellTradeData.tile_index,
-    "player",
-    sellTradeData.buyer_id,
-    sellTradeData.price
-  );
-
-    if (res.success && sellTradeData.tile_index != null) {
-      window.tiles[sellTradeData.tile_index].owner_id = sellTradeData.buyer_id;
-    }
-
-  document.getElementById("buyerConfirmView").style.display = "none";
-  document.getElementById("sellResultView").style.display = "block";
-
-  document.getElementById("sellResultMessage").innerText =
-    res.success ? "🤝 Deal completed successfully." : ("❌ " + res.message);
-
-  if (res.success) refreshSidebars();
-};
-
-
-function closeSellTradeModal() {
-  document.getElementById("sellTradeModal").style.display = "none";
-
-  // reset views for next time
-  document.getElementById("sellOptionsView").style.display = "block";
-  document.getElementById("sellToPlayerFormView").style.display = "none";
-  document.getElementById("buyerConfirmView").style.display = "none";
-  document.getElementById("sellResultView").style.display = "none";
-
-  // clear text
-  document.getElementById("sellResultMessage").innerText = "";
-  document.getElementById("sellPropertyLabel").innerText = "";
-}
-
-
-document.getElementById("sellToBankBtn").onclick = async () => {
-  const ownerPanel = document.querySelector(`.player-panel[data-player-id="${sellTradeData.owner_id}"]`);
-  if (!ownerPanel) return alert("Owner panel not found");
-
-  const res = await window.GameActionsProxy.confirmSellProperty(ownerPanel, sellTradeData.tile_index, "bank");
-
-  if (res.success && sellTradeData.tile_index != null) {
-    window.tiles[sellTradeData.tile_index].owner_id = null;
+  function canProceedSellToPlayer() {
+    const price = Number(document.getElementById("askingPrice").value);
+    const buyerId = document.getElementById("sellBuyerSelect").value;
+    return price > 0 && buyerId;
   }
 
-  document.getElementById("sellOptionsView").style.display = "none";
-  document.getElementById("sellResultView").style.display = "block";
-  document.getElementById("sellResultMessage").innerText = res.success ? "✅ Sold to bank." : ("❌ " + res.message);
+  document.getElementById("askingPrice").addEventListener("input", () => {
+    document.getElementById("proceedToBuyerBtn").disabled = !canProceedSellToPlayer();
+  });
 
-  if (res.success) refreshSidebars();
-};
-window.openSellTradeModal = openSellTradeModal;
-window.closeSellTradeModal = closeSellTradeModal;
-});
+  document.getElementById("sellBuyerSelect").addEventListener("change", () => {
+    document.getElementById("proceedToBuyerBtn").disabled = !canProceedSellToPlayer();
+  });
+
+
+  document.getElementById("proceedToBuyerBtn").onclick = () => {
+    const price = Number(document.getElementById("askingPrice").value);
+    const buyerId = Number(document.getElementById("sellBuyerSelect").value);
+
+    const buyerObj = (window.playersData || []).find(p => Number(p.player_id) === buyerId);
+    if (!buyerObj) return alert("Invalid buyer selected");
+
+    sellTradeData.price = price;
+    sellTradeData.buyer_id = buyerId;
+    sellTradeData.buyer_name = buyerObj.name;
+
+    document.getElementById("finalPrice").innerText = price;
+    document.getElementById("buyerConfirmName").innerText = buyerObj.name;
+
+    document.getElementById("sellToPlayerFormView").style.display = "none";
+    document.getElementById("buyerConfirmView").style.display = "block";
+  };
+
+
+  document.getElementById("declineSellBtn").onclick = () => {
+      document.getElementById("buyerConfirmView").style.display = "none";
+      document.getElementById("sellResultView").style.display = "block";
+      document.getElementById("sellResultMessage").innerText =
+          "❌ Buyer declined the offer.";
+  };
+
+  document.getElementById("acceptSellBtn").onclick = async () => {
+    const ownerPanel = document.querySelector(`.player-panel[data-player-id="${sellTradeData.owner_id}"]`);
+    if (!ownerPanel) return alert("Owner panel not found");
+
+    const res = await window.GameActionsProxy.confirmSellProperty(
+      ownerPanel,
+      sellTradeData.tile_index,
+      "player",
+      sellTradeData.buyer_id,
+      sellTradeData.price
+    );
+
+      if (res.success && sellTradeData.tile_index != null) {
+        window.tiles[sellTradeData.tile_index].owner_id = sellTradeData.buyer_id;
+      }
+
+    document.getElementById("buyerConfirmView").style.display = "none";
+    document.getElementById("sellResultView").style.display = "block";
+
+    document.getElementById("sellResultMessage").innerText =
+      res.success ? "🤝 Deal completed successfully." : ("❌ " + res.message);
+
+    if (res.success) refreshSidebars();
+  };
+
+
+  function closeSellTradeModal() {
+    document.getElementById("sellTradeModal").style.display = "none";
+
+    // reset views for next time
+    document.getElementById("sellOptionsView").style.display = "block";
+    document.getElementById("sellToPlayerFormView").style.display = "none";
+    document.getElementById("buyerConfirmView").style.display = "none";
+    document.getElementById("sellResultView").style.display = "none";
+
+    // clear text
+    document.getElementById("sellResultMessage").innerText = "";
+    document.getElementById("sellPropertyLabel").innerText = "";
+  }
+
+
+  document.getElementById("sellToBankBtn").onclick = async () => {
+    const ownerPanel = document.querySelector(`.player-panel[data-player-id="${sellTradeData.owner_id}"]`);
+    if (!ownerPanel) return alert("Owner panel not found");
+
+    const res = await window.GameActionsProxy.confirmSellProperty(ownerPanel, sellTradeData.tile_index, "bank");
+
+    if (res.success && sellTradeData.tile_index != null) {
+      window.tiles[sellTradeData.tile_index].owner_id = null;
+    }
+
+    document.getElementById("sellOptionsView").style.display = "none";
+    document.getElementById("sellResultView").style.display = "block";
+    document.getElementById("sellResultMessage").innerText = res.success ? "✅ Sold to bank." : ("❌ " + res.message);
+
+    if (res.success) refreshSidebars();
+  };
+  window.openSellTradeModal = openSellTradeModal;
+  window.closeSellTradeModal = closeSellTradeModal;
+  });
 
 function refreshSidebars() {
     fetch(`../../Backend/getSidebarData.php?game_id=${currentGameId}`)
