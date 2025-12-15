@@ -35,13 +35,15 @@ for (let i = 0; i < tiles.length; i++) {
 }
 
 generateTiles();
-renderBuildingsFromDB(); 
+const PLAYER_ICONS = ["🏰", "🚗", "🛵", "🎩"];
 
-const players = (window.playersData || []).map(p => ({
+const players = (window.playersData || []).map((p, index) => ({
   id: p.player_id,
   pos: Number(p.position ?? 0),
+  icon: PLAYER_ICONS[index % PLAYER_ICONS.length],
   element: null
 }));
+
 
 console.log("Loaded playersData:", window.playersData);
 console.log("Initial board positions:", players.map(x => ({ id: x.id, pos: x.pos })));
@@ -107,7 +109,7 @@ export function initPlayers(mappingLabels) {
   players.forEach(p => {
     const piece = document.createElement("div");
     piece.classList.add("player", `p${p.id}`);
-    piece.textContent = p.id;
+    piece.textContent = p.icon;
     p.element = piece;
     movePlayer(p, mappingLabels);
   });

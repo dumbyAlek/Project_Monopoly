@@ -9,6 +9,14 @@ $propertyId = intval($data['propertyId']);
 $db = Database::getInstance()->getConnection();
 $db->begin_transaction();
 
+if (!$data || !isset($data['playerId'], $data['propertyId'])) {
+    echo json_encode([
+        'success' => false,
+        'message' => 'Invalid JSON input'
+    ]);
+    exit;
+}
+
 try {
     // Get player info
     $playerStmt = $db->prepare("SELECT money, current_game_id FROM Player WHERE player_id = ? FOR UPDATE");

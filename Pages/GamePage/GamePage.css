@@ -23,10 +23,10 @@ body {
    Sidebar
 ============================== */
 .sidebar {
-    width: 320px;
+    width: 250px;
     background-color: #8795AB;
     color: #ecf0f1;
-    padding: 20px;
+    padding: 10px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -211,7 +211,8 @@ body {
     border-radius: 10px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     color: #fff;
-    font-size: 14px;
+    font-size: 12px;
+    height: 19vh;
 }
 
 .player-panel h3 {
@@ -219,7 +220,8 @@ body {
     align-items: center;
     justify-content: space-between;
     margin: 0 0 10px 0;
-    font-size: 18px;
+    font-size: 25px;
+    color: #fff;
 }
 
 .player-icon {
@@ -231,20 +233,19 @@ body {
 /* Player panel info */
 .player-panel p {
     margin: 5px 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    font-size: 18px;
 }
 
 /* Buttons inside player panel */
 .player-panel button {
-    margin-left: 5px;
+    margin-top: 25px;
     padding: 5px 10px;
-    font-size: 12px;
+    font-size: 18px;
     border: none;
-    border-radius: 4px;
+    border-radius: 500px;
     cursor: pointer;
     transition: background-color 0.2s;
+    background: #45a049;
 }
 
 /* Special buttons */
