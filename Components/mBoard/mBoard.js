@@ -1,4 +1,3 @@
-// mBoard.js
 import { animateDice, diceFaces, getRandomPosition, mappingLabels , generateTiles} from './mBoardVisuals.js';
 import { tiles } from './mBoardVisuals.js';
 import { TileDecorator } from './TileDecorator.js';
@@ -142,7 +141,6 @@ export async function rollDice(mappingLabels) {
     movePlayer(p, mappingLabels);
     enableTileActions(p.pos);
 
-    // ✅ Persist position right after moving
     fetch("../../Backend/GameActions/updatePlayerPosition.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -184,6 +182,7 @@ tiles.forEach((t, i) => {
 
     const buyBtn = tileEl.querySelector(".buy-btn");
     const sellBtn = tileEl.querySelector(".sell-btn");
+    const placeHouseOrHotelBtn = tileEl.querySelector(".placeHouseOrHotel-btn");
 
     if (buyBtn) buyBtn.addEventListener("click", async () => {
       if (!turnLocked) return;
@@ -211,6 +210,41 @@ tiles.forEach((t, i) => {
       setTurnPhase("end");
     });
 
+    if (placeHouseOrHotelBtn) placeHouseOrHotelBtn.addEventListener("click", async () => {
+      if (!turnLocked) return;
+
+      const player = players[currentPlayerIndex];
+      const playerPanel = document.querySelector(
+        `.player-panel[data-player-id="${player.id}"]`
+      );
+      if (!playerPanel) return;
+
+      const meta = window.gameProperties?.[i];
+      if (!meta) return;
+
+      const houseCount = Number(meta.house_count ?? 0);
+      const hasHotel   = Number(meta.hotel_count ?? 0);
+
+      const result = await GameActionsProxy.placeHouseOrHotel(
+        playerPanel,
+        i,
+        houseCount,
+        hasHotel
+      );
+
+      if (!result || !result.success) {
+        alert(result?.message || "Failed to place house/hotel");
+        return;
+      }
+
+      meta.house_count = result.house_count;
+      meta.hotel_count = result.hotel_count;
+
+      updateHouses(i, result.house_count, result.hotel_count > 0);
+
+      enableTileActions(i);
+      setTurnPhase("end");
+    });
 
 });
 
@@ -258,6 +292,18 @@ if (endTurnBtn) {
     enableTileActions(-1);
     setTurnPhase("roll");
   });
+}
+
+function renderBuildingsFromDB() {
+  for (let i = 0; i < tiles.length; i++) {
+    const meta = window.gameProperties?.[i];
+    if (!meta) continue;
+
+    const houseCount = Number(meta.house_count ?? 0);
+    const hasHotel   = Number(meta.hotel_count ?? 0) > 0;
+
+    updateHouses(i, houseCount, hasHotel);
+  }
 }
 
 window.__mPlayers = players;

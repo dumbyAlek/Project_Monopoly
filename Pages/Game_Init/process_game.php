@@ -153,18 +153,11 @@ foreach ($BOARD_PROPERTIES as $tileIndex => $prop) {
         die("Property insert failed: " . $propStmt->error);
     }
 
-    // IMPORTANT: store tile_index → property_id mapping in memory
     $propertyId = $propStmt->insert_id;
 
-    // Optional: keep this if you want to log/debug
-    // error_log("Tile $tileIndex => Property $propertyId");
 }
 
 $propStmt->close();
-
-
-
-
 $insPlayer->close();
 $insWallet->close();
 
