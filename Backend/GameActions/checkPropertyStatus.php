@@ -3,6 +3,7 @@ require_once "../../Database/Database.php";
 header('Content-Type: application/json');
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
+header('X-Content-Type-Options: nosniff');
 
 // Get the JSON payload
 $input = json_decode(file_get_contents('php://input'), true);
@@ -70,7 +71,7 @@ try {
             "is_mortgaged" => (bool)$property["is_mortgaged"],
             "owner_id" => $property["owner_id"] !== null ? (int)$property["owner_id"] : null,
             "current_game_id" => (int)$property["current_game_id"]
-        ]);
+    ]);
         exit;
 
     } catch (Exception $e) {
@@ -80,5 +81,6 @@ try {
         ]);
         exit;
     }
+
 
 ?>

@@ -63,8 +63,15 @@ function anyModalOpen() {
 
 async function loadCurrentTurnFromServer() {
   try {
-    const res = await fetch(`../../Backend/turnState.php?game_id=${window.currentGameId}`);
-    const data = await res.json();
+    const url = `../../Backend/turnState.php?game_id=${window.currentGameId}`;
+    const res = await fetch(url);
+
+    const raw = await res.text(); // <-- read as text first
+    console.log("turnState status:", res.status, "content-type:", res.headers.get("content-type"));
+    console.log("turnState raw response (first 200):", raw.slice(0, 200));
+
+    // now try json parse
+    const data = JSON.parse(raw);
     return data?.currentPlayerId ?? null;
   } catch (e) {
     console.error("Failed to load turn state:", e);

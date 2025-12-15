@@ -52,7 +52,10 @@ const GameActionsProxy = (() => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ propertyId, gameId: window.currentGameId ?? currentGameId })
             });
-            const prop = await res.json();
+            const raw = await res.text();
+            console.log("checkPropertyStatus status:", res.status, res.headers.get("content-type"));
+            console.log("checkPropertyStatus raw (first 200):", raw.slice(0, 200));
+            const prop = JSON.parse(raw);
 
             if (!prop.success) {
                 alert(prop.message || "Failed to fetch property status");
