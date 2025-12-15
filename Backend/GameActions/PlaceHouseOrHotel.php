@@ -6,49 +6,104 @@ header('Content-Type: application/json');
 
 $data = json_decode(file_get_contents('php://input'), true);
 if (!$data) {
-  echo json_encode(['success' => false, 'message' => 'Invalid JSON']);
-  exit;
+    echo json_encode(['success' => false, 'message' => 'Invalid input']);
+    exit;
 }
+
+$gameId     = (int)$data['gameId'];
+$playerId   = (int)$data['playerId'];
+$propertyId = (int)$data['propertyId'];
+$tileIndex  = (int)$data['tileIndex'];
 
 $db = Database::getInstance()->getConnection();
 
-$playerId   = (int)$data['playerId'];
-$propertyId = (int)$data['propertyId'];
-$houses     = (int)$data['house_count'];
-$hasHotel   = (int)$data['has_hotel'];
-
 try {
-  $db->begin_transaction();
+    $db->begin_transaction();
 
-  $stmt = $db->prepare("
-    SELECT owner_id 
-    FROM Property 
-    WHERE property_id = ?
-    FOR UPDATE
-  ");
-  $stmt->bind_param("i", $propertyId);
-  $stmt->execute();
-  $prop = $stmt->get_result()->fetch_assoc();
+    if ($tileIndex < 10) $cost = 50;
+    elseif ($tileIndex < 20) $cost = 100;
+    elseif ($tileIndex < 30) $cost = 150;
+    else $cost = 200;
 
-  if (!$prop || (int)$prop['owner_id'] !== $playerId) {
-    throw new Exception("Player does not own this property");
-  }
+    $stmt = $db->prepare("
+        SELECT owner_id, house_count, hotel_count
+        FROM Property
+        WHERE property_id = ? AND current_game_id = ?
+        FOR UPDATE
+    ");
+    $stmt->bind_param("ii", $propertyId, $gameId);
+    $stmt->execute();
+    $property = $stmt->get_result()->fetch_assoc();
 
-  $stmt = $db->prepare("
-    UPDATE Property
-    SET house_count = ?, has_hotel = ?
-    WHERE property_id = ?
-  ");
-  $stmt->bind_param("iii", $houses, $hasHotel, $propertyId);
-  $stmt->execute();
+    if (!$property) {
+        throw new Exception("Property not found");
+    }
 
-  $db->commit();
-  echo json_encode(['success' => true]);
+    if ((int)$property['owner_id'] !== $playerId) {
+        throw new Exception("Player does not own this property");
+    }
+
+    $stmt = $db->prepare("
+        SELECT money
+        FROM Player
+        WHERE player_id = ?
+        FOR UPDATE
+    ");
+    $stmt->bind_param("i", $playerId);
+    $stmt->execute();
+    $player = $stmt->get_result()->fetch_assoc();
+
+    if (!$player || (int)$player['money'] < $cost) {
+        throw new Exception("Insufficient Fund");
+    }
+
+    $houseCount = (int)$property['house_count'];
+    $hotelCount = (int)$property['hotel_count'];
+    $message    = "";
+
+    if ($hotelCount > 0) {
+        throw new Exception("Max Number of Houses/Hotel Placed");
+    }
+
+    if ($houseCount >= 0 && $houseCount < 4) {
+        $houseCount++;
+        $message = "House {$houseCount} placed successfully";
+    } elseif ($houseCount === 4) {
+        $houseCount = 0;
+        $hotelCount = 1;
+        $message = "Hotel placed successfully";
+    }
+
+    $stmt = $db->prepare("
+        UPDATE Property
+        SET house_count = ?, hotel_count = ?
+        WHERE property_id = ?
+    ");
+    $stmt->bind_param("iii", $houseCount, $hotelCount, $propertyId);
+    $stmt->execute();
+
+    $stmt = $db->prepare("
+        UPDATE Player
+        SET money = money - ?
+        WHERE player_id = ?
+    ");
+    $stmt->bind_param("ii", $cost, $playerId);
+    $stmt->execute();
+
+    $db->commit();
+
+    echo json_encode([
+        'success' => true,
+        'house_count' => $houseCount,
+        'hotel_count' => $hotelCount,
+        'cost' => $cost,
+        'message' => $message
+    ]);
 
 } catch (Throwable $e) {
-  $db->rollback();
-  echo json_encode([
-    'success' => false,
-    'message' => $e->getMessage()
-  ]);
+    $db->rollback();
+    echo json_encode([
+        'success' => false,
+        'message' => $e->getMessage()
+    ]);
 }
