@@ -25,18 +25,57 @@ window.mappingLabels = mappingLabels;
 
 const diceResult = document.getElementById("diceResult");
 
-generateTiles();
-setTurnPhase("roll");
+for (let i = 0; i < tiles.length; i++) {
+  const meta = gameProperties?.[i];
+  if (meta) {
+    tiles[i].id = meta.id;         // optional, but useful
+    tiles[i].price = meta.price;
+    tiles[i].rent = meta.rent;
+    tiles[i].owner_id = meta.owner_id;
+  }
+}
 
-const players = [
-  { id: 1, pos: 0, element: null },
-  { id: 2, pos: 0, element: null },
-  { id: 3, pos: 0, element: null },
-  { id: 4, pos: 0, element: null }
-];
+generateTiles();
+
+const players = (window.playersData || []).map(p => ({
+  id: p.player_id,
+  pos: Number(p.position ?? 0),
+  element: null
+}));
+
+console.log("Loaded playersData:", window.playersData);
+console.log("Initial board positions:", players.map(x => ({ id: x.id, pos: x.pos })));
+
+if (players.length === 0) {
+  console.error("No playersData found. window.playersData is empty.");
+}
+
 
 let currentPlayerIndex = 0;
 let turnLocked = false;  // prevents advancing turn until actions are done
+
+async function loadCurrentTurnFromServer() {
+  try {
+    const res = await fetch(`../../Backend/turnState.php?game_id=${window.currentGameId}`);
+    const data = await res.json();
+    return data?.currentPlayerId ?? null;
+  } catch (e) {
+    console.error("Failed to load turn state:", e);
+    return null;
+  }
+}
+
+function saveCurrentTurnToServer(playerId) {
+  // use fetch (or sendBeacon if you want later)
+  fetch(`../../Backend/turnState.php`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      gameId: Number(window.currentGameId),
+      currentPlayerId: Number(playerId)
+    })
+  }).catch(console.error);
+}
 
 
 // Move a player to its tile
@@ -86,6 +125,13 @@ export async function rollDice(mappingLabels) {
     movePlayer(p, mappingLabels);
     enableTileActions(p.pos);
 
+    // ✅ Persist position right after moving
+    fetch("../../Backend/GameActions/updatePlayerPosition.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ playerId: p.id, position: p.pos })
+    }).catch(console.error);
+
     diceResult.textContent = `Player ${p.id} rolled ${die1} + ${die2} = ${total}`;
 
     // Lock the turn until player finishes actions
@@ -99,37 +145,53 @@ export async function rollDice(mappingLabels) {
 if (rollBtn) {
   rollBtn.addEventListener("click", () => rollDice(mappingLabels));
 }
-initPlayers(mappingLabels);
+
+(async () => {
+  // Load current player from Log
+  const currentPlayerId = await loadCurrentTurnFromServer();
+
+  if (currentPlayerId != null) {
+    const idx = players.findIndex(p => Number(p.id) === Number(currentPlayerId));
+    if (idx !== -1) currentPlayerIndex = idx;
+  }
+
+  initPlayers(mappingLabels);
+  setTurnPhase("roll");
+})();
 
 
 // Add button event listeners for all tiles
 tiles.forEach((t, i) => {
     const tileEl = document.getElementById(mappingLabels[i]);
+    if (!tileEl) return;
+
     const buyBtn = tileEl.querySelector(".buy-btn");
     const sellBtn = tileEl.querySelector(".sell-btn");
 
-    if (buyBtn) buyBtn.addEventListener("click", () => {
+    if (buyBtn) buyBtn.addEventListener("click", async () => {
+      if (!turnLocked) return;
       const player = players[currentPlayerIndex];
       const playerPanel = document.querySelector(`.player-panel[data-player-id="${player.id}"]`);
+      if (!playerPanel) return console.error("Missing player panel for", player.id);
 
-      GameActionsProxy.buyProperty(playerPanel, i);
+      // GameActionsProxy.buyProperty(playerPanel, dbPropertyId);
+      await GameActionsProxy.buyProperty(playerPanel, i);
 
-      turnLocked = false;
-      currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-      enableTileActions(-1);
-      setTurnPhase("roll");
+      enableTileActions(i);
+      setTurnPhase("end");
     });
 
-    if (sellBtn) sellBtn.addEventListener("click", () => {
+    if (sellBtn) sellBtn.addEventListener("click", async () => {
+      if (!turnLocked) return;
       const player = players[currentPlayerIndex];
       const playerPanel = document.querySelector(`.player-panel[data-player-id="${player.id}"]`);
+      if (!playerPanel) return console.error("Missing player panel for", player.id);
 
-      GameActionsProxy.sellProperty(playerPanel, i);
-
-      turnLocked = false;
-      currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-      enableTileActions(-1);
-      setTurnPhase("roll");
+      // GameActionsProxy.sellProperty(playerPanel, dbPropertyId);
+      await GameActionsProxy.sellProperty(playerPanel, i);
+      
+      enableTileActions(i);
+      setTurnPhase("end");
     });
 
 
@@ -168,15 +230,17 @@ if (endTurnBtn) {
     if (!turnLocked) return;
 
     turnLocked = false;
+
+    // Advance to next player
     currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+
+    // ✅ Persist whose turn is next
+    saveCurrentTurnToServer(players[currentPlayerIndex].id);
 
     enableTileActions(-1);
     setTurnPhase("roll");
   });
 }
 
-for (let i = 0; i < tiles.length; i++) {
-    if (gameProperties[i]) {
-        tiles[i].property = gameProperties[i];
-    }
-}
+window.__mPlayers = players;
+window.tiles = tiles;

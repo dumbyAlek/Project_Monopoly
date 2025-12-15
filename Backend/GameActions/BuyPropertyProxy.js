@@ -3,21 +3,59 @@ export const buyPropertyProxy = async (buyerId, propertyId, ownerId = null, offe
     try {
         let url = '';
         let payload = {
-            buyer_id: buyerId,
-            property_id: propertyId
+        playerId: Number(buyerId),
+        propertyId: Number(propertyId)
         };
+        // let payload = {
+        // playerId: buyerId,
+        // propertyId: propertyId
+        // };
 
 
         if (ownerId === null) {
             // Property is unowned → buy from bank
-            url = 'buyUnownedProperty.php';
+            url = '../../Backend/GameActions/buyUnownedProperty.php';
             if (offerPrice) payload.offerPrice = offerPrice;
-        } else if (ownerId !== buyerId) {
-            // Property owned by another player → buy from player
-            url = 'buyOwnedProperty.php';
-            payload.sellerId = ownerId;
-            if (offerPrice) payload.offerPrice = offerPrice;
-        } else {
+        } else if (String(ownerId) !== String(buyerId)) {
+
+            // If no offerPrice yet -> open modal and STOP here (no backend call)
+            if (!offerPrice || Number(offerPrice) <= 0) {
+                // find tileIndex from window.gameProperties (keyed by tileIndex)
+                const tileIndex = Object.keys(window.gameProperties || {}).find(
+                    k => String(window.gameProperties[k]?.id) === String(propertyId)
+                );
+
+                // build buyer/owner objects for modal display (uses window.playersData)
+                const buyerObj = {
+                    id: buyerId,
+                    name: (window.playersData || []).find(p => String(p.player_id) === String(buyerId))?.name || `Player ${buyerId}`
+                };
+                const ownerObj = {
+                    id: ownerId,
+                    name: (window.playersData || []).find(p => String(p.player_id) === String(ownerId))?.name || `Player ${ownerId}`
+                };
+
+                if (typeof window.openTradeModal === "function") {
+                    window.openTradeModal(buyerObj, ownerObj, Number(tileIndex)); // pass tileIndex
+                } else {
+                    return { success:false, message:"Trade modal function not found" };
+                }
+
+                return { success: true, openModal: true };
+            }
+
+            // Offer exists -> now do the real purchase through backend
+            url = '../../Backend/GameActions/buyOwnedProperty.php';
+
+            // IMPORTANT: your PHP expects buyer_id, owner_id, property_id, offer
+            payload = {
+                buyer_id: Number(buyerId),
+                owner_id: Number(ownerId),
+                property_id: Number(propertyId),
+                offer: Number(offerPrice)
+            };
+        }
+        else {
             return { success: false, message: "You already own this property" };
         }
 

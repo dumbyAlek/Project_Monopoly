@@ -13,6 +13,7 @@ $dataFacade = new DataFacade($db, $currentGameId);
 // Fetch bank and players using facade
 $bank = $dataFacade->getBank();
 $players = $dataFacade->getPlayers();
+$properties = $dataFacade->getProperties();
 ?>
 
 
@@ -25,6 +26,16 @@ $players = $dataFacade->getPlayers();
     <link rel="stylesheet" href="GamePage.css">
 </head>
 <body>
+    <script>
+        window.currentGameId = <?php echo json_encode($currentGameId); ?>;
+        window.playersData = <?php echo json_encode(array_map(fn($p)=>[
+            "player_id" => (int)$p["player_id"],
+            "name" => $p["player_name"],
+            "position" => (int)$p["position"],
+            "is_in_jail" => (bool)$p["is_in_jail"],
+            "has_get_out_card" => (bool)$p["has_get_out_card"]
+        ], $players)); ?>;
+    </script>
     <div class="game-container">
     <!-- Left Sidebar: Bank -->
     <aside class="sidebar left-sidebar">
@@ -161,11 +172,17 @@ $players = $dataFacade->getPlayers();
 
     </div>
 
+    <script>
+        const currentGameId = <?php echo json_encode($currentGameId); ?>;
+    </script>
+
     <script src="GameFacade.js"></script>
     <script type="module" src="GameActionsProxy.js"></script>
     <script src="GamePage.js"></script>
     <script>
-        window.gameProperties = <?php echo $propertiesJson; ?>;
-</script>
+        window.gameProperties = <?php echo json_encode($properties ?? [], JSON_UNESCAPED_UNICODE); ?>;
+        console.log(window.gameProperties);
+    </script>
+    window.openTradeModal = openTradeModal;
 </body>
 </html>

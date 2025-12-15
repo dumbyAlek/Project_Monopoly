@@ -33,15 +33,24 @@ const GameActionsProxy = (() => {
     }
 
     // Buy property
-    async function buyProperty(playerPanel, propertyId, offerPrice = null) {
+    async function buyProperty(playerPanel, tileIndex, offerPrice = null) {
         const playerId = playerPanel.dataset.playerId;
+
+        // ✅ tileIndex -> real DB property_id
+        const meta = window.gameProperties?.[tileIndex];
+        if (!meta || !meta.id) {
+            alert("This tile is not a purchasable property.");
+            return;
+        }
+        const propertyId = meta.id;
+
 
         try {
             // Call backend to get property info (owner, price)
             const res = await fetch('../../Backend/GameActions/checkPropertyStatus.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ propertyId })
+                body: JSON.stringify({ propertyId, gameId: window.currentGameId ?? currentGameId })
             });
             const prop = await res.json();
 
@@ -52,9 +61,11 @@ const GameActionsProxy = (() => {
 
             // Use buyPropertyProxy to handle the correct buy logic
             const result = await buyPropertyProxy(playerId, propertyId, prop.owner_id, offerPrice);
+            if (result?.openModal) return result;
 
             if (result.success) {
-                updatePropertyUI(propertyId, result.owned, result.newBalance, playerPanel);
+                updatePropertyUI(tileIndex, result.owned, result.newBalance, playerPanel);
+                alert(result.message || "Property successfully bought!");
             } else {
                 alert(result.message || "Failed to buy property");
             }
@@ -68,10 +79,15 @@ const GameActionsProxy = (() => {
     }
 
     // Sell property
-    async function sellProperty(playerPanel, propertyId, sellPrice = null) {
+    async function sellProperty(playerPanel, tileIndex, sellPrice = null) {
         const playerId = playerPanel.dataset.playerId;
 
-        
+        const meta = window.gameProperties?.[tileIndex];
+        if (!meta || !meta.id) {
+            alert("This tile is not a sellable property.");
+            return;
+        }
+        const propertyId = meta.id;
 
         try {
 
@@ -79,7 +95,7 @@ const GameActionsProxy = (() => {
             const res = await fetch('../../Backend/GameActions/checkPropertyStatus.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ propertyId })
+                body: JSON.stringify({ propertyId, gameId: window.currentGameId ?? currentGameId })
             });
             const prop = await res.json();
 
@@ -95,10 +111,11 @@ const GameActionsProxy = (() => {
             }
 
             // Use sellPropertyProxy to handle correct sell logic
-            const result = await sellPropertyProxy(playerId, propertyId, prop.owner_id, sellPrice);
+            const result = await sellPropertyProxy(playerId, propertyId, prop.owner_id, null, sellPrice);
 
             if (result.success) {
-                updatePropertyUI(propertyId, result.owned, result.newBalance, playerPanel);
+                updatePropertyUI(tileIndex, result.owned, result.newBalance, playerPanel);
+                alert(result.message || "Property successfully sold!");
             } else {
                 alert(result.message || "Cannot sell property");
             }
@@ -111,19 +128,18 @@ const GameActionsProxy = (() => {
         }
     }
 
-    function updatePropertyUI(propertyId, owned, newBalance, playerPanel) {
-        if (newBalance !== undefined) {
-            playerPanel.querySelector(".money-value").textContent = newBalance;
-        }
-
-        const tileId = window.mappingLabels[propertyId];
-        const buyBtn = document.querySelector(`#${tileId} .buy-btn`);
-        const sellBtn = document.querySelector(`#${tileId} .sell-btn`);
-
-        if (buyBtn) buyBtn.disabled = owned;
-        if (sellBtn) sellBtn.disabled = !owned;
+    function updatePropertyUI(tileIndex, owned, newBalance, playerPanel) {
+    if (newBalance !== undefined) {
+        playerPanel.querySelector(".money-value").textContent = newBalance;
     }
 
+    const tileId = window.mappingLabels[tileIndex];
+    const buyBtn = document.querySelector(`#${tileId} .buy-btn`);
+    const sellBtn = document.querySelector(`#${tileId} .sell-btn`);
+
+    if (buyBtn) buyBtn.disabled = owned;
+    if (sellBtn) sellBtn.disabled = !owned;
+    }
 
     return {
         getOutOfJail,
@@ -133,3 +149,4 @@ const GameActionsProxy = (() => {
 })();
 
 export { GameActionsProxy };
+window.GameActionsProxy = GameActionsProxy;

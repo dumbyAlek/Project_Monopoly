@@ -7,71 +7,110 @@ $playerId = intval($data['playerId']);
 $propertyId = intval($data['propertyId']);
 
 $db = Database::getInstance()->getConnection();
+$db->begin_transaction();
 
 try {
     // Get player info
-    $playerStmt = $db->prepare("SELECT money, current_game_id FROM Player WHERE player_id = ?");
-    $playerStmt->execute([$playerId]);
-    $player = $playerStmt->fetch(PDO::FETCH_ASSOC);
-    if (!$player) throw new Exception("Player not found");
+    $playerStmt = $db->prepare("SELECT money, current_game_id FROM Player WHERE player_id = ? FOR UPDATE");
+    if (!$playerStmt) throw new Exception("Prepare failed (Player): " . $db->error);
 
-    $gameId = $player['current_game_id'];
+    $playerStmt->bind_param("i", $playerId);
+    $playerStmt->execute();
+    $player = $playerStmt->get_result()->fetch_assoc();
+    $playerStmt->close();
+
+    if (!$player) throw new Exception("Player not found");
+    $gameId = (int)$player['current_game_id'];
 
     // Get property info
-    $propStmt = $db->prepare("SELECT price, owner_id FROM Property WHERE property_id = ? AND current_game_id = ?");
-    $propStmt->execute([$propertyId, $gameId]);
-    $property = $propStmt->fetch(PDO::FETCH_ASSOC);
+    $propStmt = $db->prepare("SELECT price, owner_id FROM Property WHERE property_id = ? AND current_game_id = ? FOR UPDATE");
+    if (!$propStmt) throw new Exception("Prepare failed (Property): " . $db->error);
+
+    $propStmt->bind_param("ii", $propertyId, $gameId);
+    $propStmt->execute();
+    $property = $propStmt->get_result()->fetch_assoc();
+    $propStmt->close();
+
     if (!$property) throw new Exception("Property not found");
 
     if ($property['owner_id'] !== null) {
-        echo json_encode(['success' => false, 'message' => 'Property already owned']);
-        exit;
+        throw new Exception("Property already owned");
     }
 
-    $price = $property['price'];
+    $price = (int)$property['price'];
     if ($player['money'] < $price) {
-        echo json_encode(['success' => false, 'message' => 'Insufficient funds']);
-        exit;
+        throw new Exception("Insufficient funds");
     }
 
     // Get bank for this game
     $bankStmt = $db->prepare("SELECT bank_id, total_funds FROM Bank WHERE game_id = ?");
-    $bankStmt->execute([$gameId]);
-    $bank = $bankStmt->fetch(PDO::FETCH_ASSOC);
-    if (!$bank) throw new Exception("Bank not found");
+    if (!$bankStmt) throw new Exception("Prepare failed (Bank): " . $db->error);
 
-    $db->beginTransaction();
+    $bankStmt->bind_param("i", $gameId);
+    $bankStmt->execute();
+    $bank = $bankStmt->get_result()->fetch_assoc();
+    $bankStmt->close();
+
+    if (!$bank) throw new Exception("Bank not found");
 
     // Deduct money from player
     $updatePlayer = $db->prepare("UPDATE Player SET money = money - ? WHERE player_id = ?");
-    $updatePlayer->execute([$price, $playerId]);
+    $updatePlayer->bind_param("ii", $price, $playerId);
+    $updatePlayer->execute();
+    if ($updatePlayer->affected_rows !== 1) {
+        throw new Exception("Failed to update player balance.");
+    }
 
     // Add money to bank
+    $bankId = (int)$bank['bank_id'];
     $updateBank = $db->prepare("UPDATE Bank SET total_funds = total_funds + ? WHERE bank_id = ?");
-    $updateBank->execute([$price, $bank['bank_id']]);
+    $updateBank->bind_param("ii", $price, $bankId);
+    $updateBank->execute();
+    if ($updateBank->affected_rows !== 1) {
+        throw new Exception("Failed to update bank balance.");
+    }
 
     // Set property owner
-    $updateProp = $db->prepare("UPDATE Property SET owner_id = ? WHERE property_id = ?");
-    $updateProp->execute([$playerId, $propertyId]);
+    $updateProp = $db->prepare("UPDATE Property SET owner_id = ? WHERE property_id = ? AND current_game_id = ?");
+    $updateProp->bind_param("iii", $playerId, $propertyId, $gameId);
+    $updateProp->execute();
+    if ($updateProp->affected_rows !== 1) {
+        throw new Exception("Failed to assign property (wrong game_id or already updated).");
+    }
+
 
     // Update wallet
-    $walletStmt = $db->prepare("INSERT INTO Wallet (player_id, propertyWorthCash, number_of_properties) 
-                                VALUES (?, ?, 1) 
-                                ON DUPLICATE KEY UPDATE 
-                                propertyWorthCash = propertyWorthCash + ?, 
-                                number_of_properties = number_of_properties + 1");
-    $walletStmt->execute([$playerId, $price, $price]);
+    $walletStmt = $db->prepare("
+        INSERT INTO Wallet (player_id, propertyWorthCash, number_of_properties)
+        VALUES (?, ?, 1)
+        ON DUPLICATE KEY UPDATE
+        propertyWorthCash = propertyWorthCash + VALUES(propertyWorthCash),
+        number_of_properties = number_of_properties + 1
+    ");
+    $walletStmt->bind_param("ii", $playerId, $price);
+    $walletStmt->execute();
 
     // Log bank transaction
-    $bankTransStmt = $db->prepare("INSERT INTO BankTransaction (bank_id, player_id, property_id, type, amount, timestamp)
-                                   VALUES (?, ?, ?, 'purchase', ?, NOW())");
-    $bankTransStmt->execute([$bank['bank_id'], $playerId, $propertyId, $price]);
+    $bankTransStmt = $db->prepare("
+        INSERT INTO BankTransaction (bank_id, player_id, property_id, type, amount, timestamp)
+        VALUES (?, ?, ?, 'purchase', ?, NOW())
+    ");
+    $bankTransStmt->bind_param("iiii", $bankId, $playerId, $propertyId, $price);
+    $bankTransStmt->execute();
 
     // Log action
+    $desc = "Player $playerId bought property $propertyId from bank";
     $logStmt = $db->prepare("INSERT INTO Log (game_id, description, timestamp) VALUES (?, ?, NOW())");
-    $logStmt->execute([$gameId, "Player $playerId bought property $propertyId from bank"]);
+    $logStmt->bind_param("is", $gameId, $desc);
+    $logStmt->execute();
 
     $db->commit();
+    $updatePlayer->close();
+    $updateBank->close();
+    $updateProp->close();
+    $walletStmt->close();
+    $bankTransStmt->close();
+    $logStmt->close();
 
     echo json_encode([
         'success' => true,
@@ -81,7 +120,7 @@ try {
     ]);
 
 } catch (Exception $e) {
-    $db->rollBack();
+    $db->rollback();
     echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
 ?>
