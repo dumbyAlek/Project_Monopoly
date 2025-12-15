@@ -23,6 +23,59 @@ $properties = $dataFacade->getProperties();
     <title>Monopoly Game</title>
     <link rel="stylesheet" href="GamePage.css">
 </head>
+<style>
+    /* ===========================
+   Left Sidebar Buttons
+   =========================== */
+.left-sidebar .bank-panel button {
+    display: block;
+    width: 90%;
+    margin: 10px auto;
+    padding: 12px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(135deg, #4caf50, #43a047);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.left-sidebar .bank-panel button:hover {
+    background: linear-gradient(135deg, #43a047, #388e3c);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 10px rgba(0,0,0,0.15);
+}
+
+.left-sidebar .bank-panel button:active {
+    transform: translateY(1px);
+    box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+}
+
+/* Optional: Different colors for specific buttons */
+#save-game-btn {
+    background: linear-gradient(135deg, #2196f3, #1976d2);
+}
+
+#save-game-btn:hover {
+    background: linear-gradient(135deg, #1976d2, #1565c0);
+}
+
+.left-sidebar .bank-panel button:nth-of-type(2) { /* Start New Game */
+    background: linear-gradient(135deg, #ff9800, #fb8c00);
+}
+
+.left-sidebar .bank-panel button:nth-of-type(3) { /* Home */
+    background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+}
+
+.left-sidebar .bank-panel button:nth-of-type(4) { /* Log Out */
+    background: linear-gradient(135deg, #f44336, #d32f2f);
+}
+
+</style>
 <body>
     <script>
         window.currentGameId = <?php echo json_encode($currentGameId); ?>;
@@ -162,23 +215,26 @@ $properties = $dataFacade->getProperties();
 
     <aside class="sidebar right-sidebar">
         <div class="players-container">
-            <?php foreach($players as $p): ?>
+            <?php 
+            // Hardcoded icons (order-based)
+            $icons = ["🏰","🚗","🛵","🎩"];
+            foreach($players as $index => $p): 
+                $icon = $icons[$index % count($icons)]; // safe even if more than 4 players
+            ?>
                 <div class="player-panel" data-player-id="<?php echo $p['player_id']; ?>">
-                    <!-- <h3><?php echo htmlspecialchars($p['player_name']); ?> <img src="../../Assets/player-icon.png" alt="icon" class="player-icon"></h3> -->
+                    <h3>
+                        <?php echo htmlspecialchars($p['player_name']); ?> 
+                        <span class="player-icon"><?php echo $icon; ?></span>
+                    </h3>
                     <p>Money: $<span class="money-value"><?php echo $p['money']; ?></span></p>
                     <p>Properties: <?php echo $p['number_of_properties']; ?> ($<?php echo $p['propertyWorthCash']; ?>)</p>
                     <p>Get Out of Jail Card: <?php echo $p['has_get_out_card'] ? "Yes" : "No"; ?></p>
-                    <p>Loan: $0 <button class="pay-loan-btn">Pay</button></p>
-                    <p>Debt from Players: $<?php echo $p['debt_from_players']; ?></p>
-                     $<?php echo $p['debt_to_players']; ?> 
-                        <button class="pay-debt-btn">Pay</button> 
-                        <button class="ask-debt-btn">Ask</button>
-                    </p>
                     <button class="get-out-jail-btn" <?php echo $p['is_in_jail'] ? '' : 'disabled'; ?>>Get Out of Jail</button>
                 </div>
             <?php endforeach; ?>
         </div>
     </aside>
+
 
     </div>
 

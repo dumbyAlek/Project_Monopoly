@@ -1,4 +1,3 @@
-// mBoard.js
 import { animateDice, diceFaces, getRandomPosition, mappingLabels , generateTiles} from './mBoardVisuals.js';
 import { tiles } from './mBoardVisuals.js';
 import { TileDecorator } from './TileDecorator.js';
@@ -36,12 +35,15 @@ for (let i = 0; i < tiles.length; i++) {
 }
 
 generateTiles();
+const PLAYER_ICONS = ["🏰", "🚗", "🛵", "🎩"];
 
-const players = (window.playersData || []).map(p => ({
+const players = (window.playersData || []).map((p, index) => ({
   id: p.player_id,
   pos: Number(p.position ?? 0),
+  icon: PLAYER_ICONS[index % PLAYER_ICONS.length],
   element: null
 }));
+
 
 console.log("Loaded playersData:", window.playersData);
 console.log("Initial board positions:", players.map(x => ({ id: x.id, pos: x.pos })));
@@ -63,8 +65,15 @@ function anyModalOpen() {
 
 async function loadCurrentTurnFromServer() {
   try {
-    const res = await fetch(`../../Backend/turnState.php?game_id=${window.currentGameId}`);
-    const data = await res.json();
+    const url = `../../Backend/turnState.php?game_id=${window.currentGameId}`;
+    const res = await fetch(url);
+
+    const raw = await res.text(); // <-- read as text first
+    console.log("turnState status:", res.status, "content-type:", res.headers.get("content-type"));
+    console.log("turnState raw response (first 200):", raw.slice(0, 200));
+
+    // now try json parse
+    const data = JSON.parse(raw);
     return data?.currentPlayerId ?? null;
   } catch (e) {
     console.error("Failed to load turn state:", e);
@@ -100,7 +109,7 @@ export function initPlayers(mappingLabels) {
   players.forEach(p => {
     const piece = document.createElement("div");
     piece.classList.add("player", `p${p.id}`);
-    piece.textContent = p.id;
+    piece.textContent = p.icon;
     p.element = piece;
     movePlayer(p, mappingLabels);
   });
@@ -132,7 +141,6 @@ export async function rollDice(mappingLabels) {
     movePlayer(p, mappingLabels);
     enableTileActions(p.pos);
 
-    // ✅ Persist position right after moving
     fetch("../../Backend/GameActions/updatePlayerPosition.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -174,6 +182,7 @@ tiles.forEach((t, i) => {
 
     const buyBtn = tileEl.querySelector(".buy-btn");
     const sellBtn = tileEl.querySelector(".sell-btn");
+    const placeHouseOrHotelBtn = tileEl.querySelector(".placeHouseOrHotel-btn");
 
     if (buyBtn) buyBtn.addEventListener("click", async () => {
       if (!turnLocked) return;
@@ -201,6 +210,41 @@ tiles.forEach((t, i) => {
       setTurnPhase("end");
     });
 
+    if (placeHouseOrHotelBtn) placeHouseOrHotelBtn.addEventListener("click", async () => {
+      if (!turnLocked) return;
+
+      const player = players[currentPlayerIndex];
+      const playerPanel = document.querySelector(
+        `.player-panel[data-player-id="${player.id}"]`
+      );
+      if (!playerPanel) return;
+
+      const meta = window.gameProperties?.[i];
+      if (!meta) return;
+
+      const houseCount = Number(meta.house_count ?? 0);
+      const hasHotel   = Number(meta.hotel_count ?? 0);
+
+      const result = await GameActionsProxy.placeHouseOrHotel(
+        playerPanel,
+        i,
+        houseCount,
+        hasHotel
+      );
+
+      if (!result || !result.success) {
+        alert(result?.message || "Failed to place house/hotel");
+        return;
+      }
+
+      meta.house_count = result.house_count;
+      meta.hotel_count = result.hotel_count;
+
+      updateHouses(i, result.house_count, result.hotel_count > 0);
+
+      enableTileActions(i);
+      setTurnPhase("end");
+    });
 
 });
 
@@ -248,6 +292,18 @@ if (endTurnBtn) {
     enableTileActions(-1);
     setTurnPhase("roll");
   });
+}
+
+function renderBuildingsFromDB() {
+  for (let i = 0; i < tiles.length; i++) {
+    const meta = window.gameProperties?.[i];
+    if (!meta) continue;
+
+    const houseCount = Number(meta.house_count ?? 0);
+    const hasHotel   = Number(meta.hotel_count ?? 0) > 0;
+
+    updateHouses(i, houseCount, hasHotel);
+  }
 }
 
 window.__mPlayers = players;
