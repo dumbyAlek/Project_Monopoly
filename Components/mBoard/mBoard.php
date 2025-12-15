@@ -1,4 +1,3 @@
-<!-- mBoard.php -->
 <!DOCTYPE html>
 
   <link rel="stylesheet" href="../../Components/mBoard/mBoard.css">

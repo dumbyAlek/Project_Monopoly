@@ -12,7 +12,7 @@ const GameActionsProxy = (() => {
             const res = await fetch('../../Backend/GameActions/getOutOfJail.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ playerId })
+                body: JSON.stringify({ playerId, gameId: Number(window.currentGameId ?? 0) })
             });
             const result = await res.json();
 
@@ -79,53 +79,84 @@ const GameActionsProxy = (() => {
     }
 
     // Sell property
-    async function sellProperty(playerPanel, tileIndex, sellPrice = null) {
-        const playerId = playerPanel.dataset.playerId;
+    async function sellProperty(playerPanel, tileIndex) {
+    const playerId = playerPanel.dataset.playerId;
 
-        const meta = window.gameProperties?.[tileIndex];
-        if (!meta || !meta.id) {
-            alert("This tile is not a sellable property.");
-            return;
+    const meta = window.gameProperties?.[tileIndex];
+    if (!meta || !meta.id) {
+        alert("This tile is not a sellable property.");
+        return;
+    }
+
+    const propertyId = meta.id;
+    const propertyName = meta.name || meta.property_name || ""; // whichever you store
+
+    try {
+        const res = await fetch('../../Backend/GameActions/checkPropertyStatus.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ propertyId, gameId: window.currentGameId ?? currentGameId })
+        });
+
+        const prop = await res.json();
+        if (!prop.success) {
+        alert(prop.message || "Cannot fetch property info");
+        return;
         }
-        const propertyId = meta.id;
 
-        try {
-
-            // Call backend to get property info (owner)
-            const res = await fetch('../../Backend/GameActions/checkPropertyStatus.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ propertyId, gameId: window.currentGameId ?? currentGameId })
-            });
-            const prop = await res.json();
-
-            if (!prop.success) {
-                alert(prop.message || "Cannot fetch property info");
-                return;
-            }
-
-            
-            if (String(playerId) !== String(prop.owner_id)) {
-                alert("You do not own this property.");
-                return;
-            }
-
-            // Use sellPropertyProxy to handle correct sell logic
-            const result = await sellPropertyProxy(playerId, propertyId, prop.owner_id, null, sellPrice);
-
-            if (result.success) {
-                updatePropertyUI(tileIndex, result.owned, result.newBalance, playerPanel);
-                alert(result.message || "Property successfully sold!");
-            } else {
-                alert(result.message || "Cannot sell property");
-            }
-
-            return result;
-
-        } catch(err) {
-            console.error(err);
-            alert("Error selling property");
+        if (String(playerId) !== String(prop.owner_id)) {
+        alert("You do not own this property.");
+        return;
         }
+
+        // ✅ open your new modal (owner only; buyer chosen inside modal)
+        const owner = { id: Number(playerId), name: getPlayerNameById(playerId) };
+        window.openSellTradeModal(owner, propertyId, propertyName, tileIndex);
+
+    } catch (err) {
+        console.error(err);
+        alert("Error selling property");
+    }
+    }
+
+    // Executes sale after modal choice
+    async function confirmSellProperty(playerPanel, tileIndex, mode, buyerId = null, sellPrice = null) {
+    const playerId = playerPanel.dataset.playerId;
+
+    const meta = window.gameProperties?.[tileIndex];
+    if (!meta || !meta.id) {
+        return { success: false, message: "Invalid property tile." };
+    }
+    const propertyId = meta.id;
+
+    try {
+        // still verify ownership right before executing
+        const res = await fetch('../../Backend/GameActions/checkPropertyStatus.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ propertyId, gameId: window.currentGameId ?? currentGameId })
+        });
+        const prop = await res.json();
+        if (!prop.success) return prop;
+        if (String(playerId) !== String(prop.owner_id)) {
+            return { success: false, message: "You no longer own this property." };
+        }
+
+        const result = await sellPropertyProxy(
+        Number(playerId),
+        Number(propertyId),
+        Number(prop.owner_id),
+        mode,                    // "bank" | "player"
+        buyerId ? Number(buyerId) : null,
+        sellPrice ? Number(sellPrice) : null
+        );
+
+        return result;
+
+    } catch (err) {
+        console.error(err);
+        return { success: false, message: "Error processing sale" };
+    }
     }
 
     function updatePropertyUI(tileIndex, owned, newBalance, playerPanel) {
@@ -141,10 +172,17 @@ const GameActionsProxy = (() => {
     if (sellBtn) sellBtn.disabled = !owned;
     }
 
+    function getPlayerNameById(id) {
+        const p = (window.playersData || []).find(x => String(x.player_id) === String(id));
+        return p?.name || `Player ${id}`;
+    }
+
+
     return {
         getOutOfJail,
         buyProperty,
-        sellProperty
+        sellProperty,
+        confirmSellProperty
     };
 })();
 
