@@ -20,8 +20,17 @@ class DataFacade {
 
     public function getPlayers() {
         $stmt = $this->db->prepare("
-            SELECT p.player_id, p.player_name, p.money, p.is_in_jail, p.has_get_out_card, 
-                   w.propertyWorthCash, w.number_of_properties, w.debt_to_players, w.debt_from_players
+            SELECT 
+                p.player_id, 
+                p.player_name, 
+                p.money, 
+                p.position,
+                p.is_in_jail, 
+                p.has_get_out_card, 
+                w.propertyWorthCash, 
+                w.number_of_properties, 
+                w.debt_to_players, 
+                w.debt_from_players
             FROM Player p
             LEFT JOIN Wallet w ON p.player_id = w.player_id
             WHERE p.current_game_id = ?
@@ -30,7 +39,7 @@ class DataFacade {
         $stmt->bind_param("i", $this->gameId);
         $stmt->execute();
         $result = $stmt->get_result();
-        return $result->fetch_all(MYSQLI_ASSOC); // returns array of players
+        return $result->fetch_all(MYSQLI_ASSOC);
     }
 
     private array $propertyToTileMap = [

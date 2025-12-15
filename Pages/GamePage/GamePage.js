@@ -31,6 +31,7 @@ if (saveBtn) {
 
 // Initial attach
 attachPlayerEvents();
+GameFacade.enableAutosave(currentGameId);
 
 // ========================================== Buying from Player ==============================================================
 
@@ -199,3 +200,82 @@ function refreshSidebars() {
             attachPlayerEvents();
         });
 }
+
+function buildSavePayload() {
+  // Bank money (from UI you already update)
+  const bankText = document.querySelector(".bank-money")?.innerText || "";
+  const bankMoney = Number((bankText.match(/\$([0-9]+)/)?.[1]) ?? 0);
+
+  // Players from panels (source of truth for money/wallet UI)
+  const playerPanels = document.querySelectorAll(".player-panel");
+  const players = Array.from(playerPanels).map(panel => {
+    const playerId = Number(panel.dataset.playerId);
+
+    const money = Number(panel.querySelector(".money-value")?.innerText ?? 0);
+
+    // Properties: "Properties: X ($Y)"
+    const propsLine = panel.querySelector("p:nth-child(2)")?.innerText || "";
+    const propsCount = Number((propsLine.match(/Properties:\s*(\d+)/)?.[1]) ?? 0);
+    const propsWorth = Number((propsLine.match(/\(\$(\d+)\)/)?.[1]) ?? 0);
+
+    const debtFromLine = panel.querySelector("p:nth-child(5)")?.innerText || "";
+    const debtFrom = Number((debtFromLine.match(/\$([0-9]+)/)?.[1]) ?? 0);
+
+    // If you track these in UI later, wire them in; for now keep 0
+    const debtTo = 0;
+
+    // Position: use window.mBoard players if available, else fallback 0
+    const pos =
+      (window.__mPlayers?.find(x => x.id === playerId)?.pos) ??
+      (window.playersData?.find(x => x.player_id === playerId)?.position) ??
+      0;
+
+    // If you render these somewhere, wire them; else fallback
+    const inJail =
+      (window.playersData?.find(x => x.player_id === playerId)?.is_in_jail) ? 1 : 0;
+
+    const hasCard =
+      (window.playersData?.find(x => x.player_id === playerId)?.has_get_out_card) ? 1 : 0;
+
+    return {
+      playerId,
+      money,
+      position: Number(pos),
+      inJail: !!inJail,
+      hasGetOutCard: !!hasCard,
+      propertiesCount: propsCount,
+      propertiesWorth: propsWorth,
+      debtToPlayers: debtTo,
+      debtFromPlayers: debtFrom
+    };
+  });
+
+  // Properties: use tiles array if it contains DB property_id + owner_id etc.
+  const properties = (window.tiles || []).map((t, tileIndex) => ({
+    tileIndex,
+    property_id: Number(t.id ?? 0),
+    owner_id: t.owner_id ?? null,
+    house_count: Number(t.house_count ?? 0),
+    hotel_count: Number(t.hotel_count ?? 0),
+    is_mortgaged: !!t.is_mortgaged
+  })).filter(p => p.property_id > 0);
+
+  return {
+    gameId: Number(window.currentGameId),
+    bank: { totalFunds: bankMoney },
+    players,
+    properties
+  };
+}
+
+// ✅ Save when user reloads/closes
+window.addEventListener("pagehide", () => {
+  try {
+    const payload = buildSavePayload();
+    const blob = new Blob([JSON.stringify(payload)], { type: "application/json" });
+    navigator.sendBeacon("../../Backend/saveGame.php", blob);
+  } catch (e) {
+    console.error("Autosave (pagehide) failed:", e);
+  }
+});
+

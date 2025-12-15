@@ -1,3 +1,5 @@
+-- Monopoly_DB.sql --> The Database for the project
+
 -- User Accounts
 CREATE TABLE IF NOT EXISTS User(
     user_id INT PRIMARY KEY AUTO_INCREMENT,

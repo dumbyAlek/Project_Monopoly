@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '../Database/Database.php';
-require_once __DIR__ . '../Pages/GamePage/DataFacade.php';
+require_once __DIR__ . '/../Database/Database.php';
+require_once __DIR__ . '/../Pages/GamePage/DataFacade.php';
 
 $db = Database::getInstance()->getConnection();
 $gameId = $_GET['game_id'];

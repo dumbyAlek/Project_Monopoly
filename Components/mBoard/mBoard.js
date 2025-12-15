@@ -36,13 +36,15 @@ for (let i = 0; i < tiles.length; i++) {
 }
 
 generateTiles();
-setTurnPhase("roll");
 
 const players = (window.playersData || []).map(p => ({
-  id: p.player_id,   // ✅ real DB player_id
-  pos: 0,
+  id: p.player_id,
+  pos: Number(p.position ?? 0),
   element: null
 }));
+
+console.log("Loaded playersData:", window.playersData);
+console.log("Initial board positions:", players.map(x => ({ id: x.id, pos: x.pos })));
 
 if (players.length === 0) {
   console.error("No playersData found. window.playersData is empty.");
@@ -51,6 +53,29 @@ if (players.length === 0) {
 
 let currentPlayerIndex = 0;
 let turnLocked = false;  // prevents advancing turn until actions are done
+
+async function loadCurrentTurnFromServer() {
+  try {
+    const res = await fetch(`../../Backend/turnState.php?game_id=${window.currentGameId}`);
+    const data = await res.json();
+    return data?.currentPlayerId ?? null;
+  } catch (e) {
+    console.error("Failed to load turn state:", e);
+    return null;
+  }
+}
+
+function saveCurrentTurnToServer(playerId) {
+  // use fetch (or sendBeacon if you want later)
+  fetch(`../../Backend/turnState.php`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      gameId: Number(window.currentGameId),
+      currentPlayerId: Number(playerId)
+    })
+  }).catch(console.error);
+}
 
 
 // Move a player to its tile
@@ -100,6 +125,13 @@ export async function rollDice(mappingLabels) {
     movePlayer(p, mappingLabels);
     enableTileActions(p.pos);
 
+    // ✅ Persist position right after moving
+    fetch("../../Backend/GameActions/updatePlayerPosition.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ playerId: p.id, position: p.pos })
+    }).catch(console.error);
+
     diceResult.textContent = `Player ${p.id} rolled ${die1} + ${die2} = ${total}`;
 
     // Lock the turn until player finishes actions
@@ -113,7 +145,19 @@ export async function rollDice(mappingLabels) {
 if (rollBtn) {
   rollBtn.addEventListener("click", () => rollDice(mappingLabels));
 }
-initPlayers(mappingLabels);
+
+(async () => {
+  // Load current player from Log
+  const currentPlayerId = await loadCurrentTurnFromServer();
+
+  if (currentPlayerId != null) {
+    const idx = players.findIndex(p => Number(p.id) === Number(currentPlayerId));
+    if (idx !== -1) currentPlayerIndex = idx;
+  }
+
+  initPlayers(mappingLabels);
+  setTurnPhase("roll");
+})();
 
 
 // Add button event listeners for all tiles
@@ -186,10 +230,17 @@ if (endTurnBtn) {
     if (!turnLocked) return;
 
     turnLocked = false;
+
+    // Advance to next player
     currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+
+    // ✅ Persist whose turn is next
+    saveCurrentTurnToServer(players[currentPlayerIndex].id);
 
     enableTileActions(-1);
     setTurnPhase("roll");
   });
 }
 
+window.__mPlayers = players;
+window.tiles = tiles;

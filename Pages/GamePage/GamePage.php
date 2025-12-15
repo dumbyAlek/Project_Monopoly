@@ -30,7 +30,10 @@ $properties = $dataFacade->getProperties();
         window.currentGameId = <?php echo json_encode($currentGameId); ?>;
         window.playersData = <?php echo json_encode(array_map(fn($p)=>[
             "player_id" => (int)$p["player_id"],
-            "name" => $p["player_name"]
+            "name" => $p["player_name"],
+            "position" => (int)$p["position"],
+            "is_in_jail" => (bool)$p["is_in_jail"],
+            "has_get_out_card" => (bool)$p["has_get_out_card"]
         ], $players)); ?>;
     </script>
     <div class="game-container">
