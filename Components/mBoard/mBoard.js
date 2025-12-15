@@ -25,15 +25,29 @@ window.mappingLabels = mappingLabels;
 
 const diceResult = document.getElementById("diceResult");
 
+for (let i = 0; i < tiles.length; i++) {
+  const meta = gameProperties?.[i];
+  if (meta) {
+    tiles[i].id = meta.id;         // optional, but useful
+    tiles[i].price = meta.price;
+    tiles[i].rent = meta.rent;
+    tiles[i].owner_id = meta.owner_id;
+  }
+}
+
 generateTiles();
 setTurnPhase("roll");
 
-const players = [
-  { id: 1, pos: 0, element: null },
-  { id: 2, pos: 0, element: null },
-  { id: 3, pos: 0, element: null },
-  { id: 4, pos: 0, element: null }
-];
+const players = (window.playersData || []).map(p => ({
+  id: p.player_id,   // ✅ real DB player_id
+  pos: 0,
+  element: null
+}));
+
+if (players.length === 0) {
+  console.error("No playersData found. window.playersData is empty.");
+}
+
 
 let currentPlayerIndex = 0;
 let turnLocked = false;  // prevents advancing turn until actions are done
@@ -105,31 +119,35 @@ initPlayers(mappingLabels);
 // Add button event listeners for all tiles
 tiles.forEach((t, i) => {
     const tileEl = document.getElementById(mappingLabels[i]);
+    if (!tileEl) return;
+
     const buyBtn = tileEl.querySelector(".buy-btn");
     const sellBtn = tileEl.querySelector(".sell-btn");
 
-    if (buyBtn) buyBtn.addEventListener("click", () => {
+    if (buyBtn) buyBtn.addEventListener("click", async () => {
+      if (!turnLocked) return;
       const player = players[currentPlayerIndex];
       const playerPanel = document.querySelector(`.player-panel[data-player-id="${player.id}"]`);
+      if (!playerPanel) return console.error("Missing player panel for", player.id);
 
-      GameActionsProxy.buyProperty(playerPanel, i);
+      // GameActionsProxy.buyProperty(playerPanel, dbPropertyId);
+      await GameActionsProxy.buyProperty(playerPanel, i);
 
-      turnLocked = false;
-      currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-      enableTileActions(-1);
-      setTurnPhase("roll");
+      enableTileActions(i);
+      setTurnPhase("end");
     });
 
-    if (sellBtn) sellBtn.addEventListener("click", () => {
+    if (sellBtn) sellBtn.addEventListener("click", async () => {
+      if (!turnLocked) return;
       const player = players[currentPlayerIndex];
       const playerPanel = document.querySelector(`.player-panel[data-player-id="${player.id}"]`);
+      if (!playerPanel) return console.error("Missing player panel for", player.id);
 
-      GameActionsProxy.sellProperty(playerPanel, i);
-
-      turnLocked = false;
-      currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-      enableTileActions(-1);
-      setTurnPhase("roll");
+      // GameActionsProxy.sellProperty(playerPanel, dbPropertyId);
+      await GameActionsProxy.sellProperty(playerPanel, i);
+      
+      enableTileActions(i);
+      setTurnPhase("end");
     });
 
 
@@ -175,8 +193,3 @@ if (endTurnBtn) {
   });
 }
 
-for (let i = 0; i < tiles.length; i++) {
-    if (gameProperties[i]) {
-        tiles[i].property = gameProperties[i];
-    }
-}

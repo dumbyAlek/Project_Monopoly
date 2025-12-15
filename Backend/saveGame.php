@@ -6,18 +6,33 @@ header('Content-Type: application/json');
 
 $data = json_decode(file_get_contents('php://input'), true);
 
-if (!$data || !isset($data['gameId'], $data['bank'], $data['players'])) {
-    echo json_encode(['success' => false, 'message' => 'Invalid input']);
+if (!$data || !isset($data['gameId'])) {
+    echo json_encode(['success' => false, 'message' => 'Invalid input: missing gameId']);
     exit;
 }
 
+// Allow 2 modes: light autosave: only gameId and full save: gameId + bank + players
+$isFullSave = isset($data['bank'], $data['players']);
+
+
 $db = Database::getInstance()->getConnection();
-$gameId = $data['gameId'];
-$bank = $data['bank'];
-$players = $data['players'];
+$gameId = (int)$data['gameId'];
+$bank = $data['bank'] ?? null;
+$players = $data['players'] ?? null;
 
 try {
     $db->begin_transaction();
+
+    // LIGHT AUTOSAVE: only update last_saved_time
+    if (!$isFullSave) {
+        $st = $db->prepare("UPDATE Game SET last_saved_time = NOW() WHERE game_id = ?");
+        $st->bind_param("i", $gameId);
+        $st->execute();
+        $db->commit();
+        echo json_encode(['success' => true, 'mode' => 'light']);
+        exit;
+    }
+
 
     // Update Bank
     $stmt = $db->prepare("UPDATE Bank SET total_funds = ? WHERE game_id = ?");

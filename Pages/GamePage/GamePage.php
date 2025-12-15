@@ -26,6 +26,13 @@ $properties = $dataFacade->getProperties();
     <link rel="stylesheet" href="GamePage.css">
 </head>
 <body>
+    <script>
+        window.currentGameId = <?php echo json_encode($currentGameId); ?>;
+        window.playersData = <?php echo json_encode(array_map(fn($p)=>[
+            "player_id" => (int)$p["player_id"],
+            "name" => $p["player_name"]
+        ], $players)); ?>;
+    </script>
     <div class="game-container">
     <!-- Left Sidebar: Bank -->
     <aside class="sidebar left-sidebar">
@@ -173,5 +180,6 @@ $properties = $dataFacade->getProperties();
         window.gameProperties = <?php echo json_encode($properties ?? [], JSON_UNESCAPED_UNICODE); ?>;
         console.log(window.gameProperties);
     </script>
+    window.openTradeModal = openTradeModal;
 </body>
 </html>

@@ -36,7 +36,24 @@ $BOARD_PROPERTIES = [
     12 => ['price' => 150, 'rent' => 10], // utility
     13 => ['price' => 140, 'rent' => 10],
     14 => ['price' => 160, 'rent' => 12],  
-    // continue for your board
+    15 => ['price' => 200, 'rent' => 25], // railroad
+    16 => ['price' => 180, 'rent' => 14],
+    18 => ['price' => 180, 'rent' => 14],
+    19 => ['price' => 200, 'rent' => 16],
+    21 => ['price' => 220, 'rent' => 18],
+    23 => ['price' => 220, 'rent' => 18],
+    24 => ['price' => 240, 'rent' => 20],
+    25 => ['price' => 200, 'rent' => 25], // railroad
+    26 => ['price' => 260, 'rent' => 22],
+    27 => ['price' => 260, 'rent' => 22],
+    28 => ['price' => 150, 'rent' => 10], // utility
+    29 => ['price' => 280, 'rent' => 24],
+    31 => ['price' => 300, 'rent' => 26],
+    32 => ['price' => 300, 'rent' => 26],
+    34 => ['price' => 320, 'rent' => 28],
+    35 => ['price' => 200, 'rent' => 25], // railroad
+    37 => ['price' => 350, 'rent' => 35],
+    39 => ['price' => 400, 'rent' => 50],
 ];
 
 // Icons fixed by slot order
@@ -121,6 +138,8 @@ $propStmt = $db->prepare("
 ");
 
 if (!$propStmt) die("Prepare failed (Property): " . $db->error);
+
+ksort($BOARD_PROPERTIES);
 
 foreach ($BOARD_PROPERTIES as $tileIndex => $prop) {
     $propStmt->bind_param(

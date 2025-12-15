@@ -36,13 +36,13 @@ attachPlayerEvents();
 
 let tradeData = {};
 
-function openTradeModal(buyer, owner, propertyId) {
+function openTradeModal(buyer, owner, tileIndex) {
     tradeData = {
         buyer_id: buyer.id,
         buyer_name: buyer.name,
         owner_id: owner.id,
         owner_name: owner.name,
-        property_id: propertyId,
+        tile_index: tileIndex,
         offer: null
     };
 
@@ -62,7 +62,7 @@ document.getElementById("offerAmount").addEventListener("input", function () {
 });
 
 document.getElementById("proceedBtn").onclick = () => {
-    tradeData.offer = document.getElementById("offerAmount").value;
+    tradeData.offer = Number(document.getElementById("offerAmount").value);
 
     document.getElementById("buyerView").style.display = "none";
     document.getElementById("ownerView").style.display = "block";
@@ -76,27 +76,27 @@ document.getElementById("declineTradeBtn").onclick = () => {
         "❌ The owner declined your offer.";
 };
 
-document.getElementById("acceptTradeBtn").onclick = () => {
-    fetch("../../Backend/GameActions/buyPropertyFromPlayer.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(tradeData)
-    })
-    .then(res => res.json())
-    .then(data => {
-        document.getElementById("ownerView").style.display = "none";
-        document.getElementById("resultView").style.display = "block";
+document.getElementById("acceptTradeBtn").onclick = async () => {
+    const offer = Number(tradeData.offer);
+    if (!offer || offer <= 0) return alert("Invalid offer");
 
-        if (data.success) {
-            document.getElementById("resultMessage").innerText =
-                "🤝 Deal Done! Property transferred successfully.";
-                refreshSidebars();
-        } else {
-            document.getElementById("resultMessage").innerText =
-                "❌ " + data.message;
-        }
-    });
+    const buyerPanel = document.querySelector(`.player-panel[data-player-id="${tradeData.buyer_id}"]`);
+    if (!buyerPanel) return alert("Buyer panel not found");
+
+    // This goes through: GameActionsProxy -> checkPropertyStatus -> BuyPropertyProxy -> buyOwnedProperty.php
+    const result = await window.GameActionsProxy.buyProperty(buyerPanel, tradeData.tile_index, offer);
+
+    document.getElementById("ownerView").style.display = "none";
+    document.getElementById("resultView").style.display = "block";
+
+    if (result?.success) {
+        document.getElementById("resultMessage").innerText = "🤝 Deal Done! Property transferred successfully.";
+        refreshSidebars();
+    } else {
+        document.getElementById("resultMessage").innerText = "❌ " + (result?.message || "Transaction failed");
+    }
 };
+
 
 function closeTradeModal() {
     document.getElementById("tradeModal").style.display = "none";
@@ -172,7 +172,7 @@ function closeSellTradeModal() {
 }
 
 function refreshSidebars() {
-    fetch(`../../Backend/GameActions/getSidebarData.php?game_id=${currentGameId}`)
+    fetch(`../../Backend/getSidebarData.php?game_id=${currentGameId}`)
         .then(res => res.json())
         .then(data => {
             // Update bank

@@ -44,8 +44,24 @@ class DataFacade {
         8  => 12,
         9  => 13,
         10 => 14,
-
-        // continue...
+        11 => 15,
+        12 => 16,
+        13 => 18,
+        14 => 19,
+        15 => 21,
+        16 => 23,
+        17 => 24,
+        18 => 25,
+        19 => 26,
+        20 => 27,
+        21 => 28,
+        22 => 29,
+        23 => 31,
+        24 => 32,
+        25 => 34,
+        26 => 35,
+        27 => 37,
+        28 => 39
     ];
 
     public function getProperties(): array {
@@ -63,18 +79,18 @@ class DataFacade {
         $rows = $result->fetch_all(MYSQLI_ASSOC);
 
         $tiles = [];
-        $boardTileIndexes = array_keys($this->propertyToTileMap);
+        $tileOrder = array_values($this->propertyToTileMap);
 
         foreach ($rows as $i => $prop) {
-            if (!isset($boardTileIndexes[$i])) continue;
+            if (!isset($tileOrder[$i])) continue;
 
-            $tileIndex = $boardTileIndexes[$i];
+            $tileIndex = $tileOrder[$i];
 
             $tiles[$tileIndex] = [
                 'id'       => (int)$prop['property_id'],
                 'price'    => (int)$prop['price'],
                 'rent'     => (int)$prop['rent'],
-                'owner_id' => $prop['owner_id']
+                'owner_id' => $prop['owner_id'] !== null ? (int)$prop['owner_id'] : null
             ];
         }
 

@@ -50,7 +50,7 @@ const GameActionsProxy = (() => {
             const res = await fetch('../../Backend/GameActions/checkPropertyStatus.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ propertyId })
+                body: JSON.stringify({ propertyId, gameId: window.currentGameId ?? currentGameId })
             });
             const prop = await res.json();
 
@@ -61,9 +61,11 @@ const GameActionsProxy = (() => {
 
             // Use buyPropertyProxy to handle the correct buy logic
             const result = await buyPropertyProxy(playerId, propertyId, prop.owner_id, offerPrice);
+            if (result?.openModal) return result;
 
             if (result.success) {
                 updatePropertyUI(tileIndex, result.owned, result.newBalance, playerPanel);
+                alert(result.message || "Property successfully bought!");
             } else {
                 alert(result.message || "Failed to buy property");
             }
@@ -93,7 +95,7 @@ const GameActionsProxy = (() => {
             const res = await fetch('../../Backend/GameActions/checkPropertyStatus.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ propertyId })
+                body: JSON.stringify({ propertyId, gameId: window.currentGameId ?? currentGameId })
             });
             const prop = await res.json();
 
@@ -109,10 +111,11 @@ const GameActionsProxy = (() => {
             }
 
             // Use sellPropertyProxy to handle correct sell logic
-            const result = await sellPropertyProxy(playerId, propertyId, prop.owner_id, sellPrice);
+            const result = await sellPropertyProxy(playerId, propertyId, prop.owner_id, null, sellPrice);
 
             if (result.success) {
                 updatePropertyUI(tileIndex, result.owned, result.newBalance, playerPanel);
+                alert(result.message || "Property successfully sold!");
             } else {
                 alert(result.message || "Cannot sell property");
             }
@@ -146,3 +149,4 @@ const GameActionsProxy = (() => {
 })();
 
 export { GameActionsProxy };
+window.GameActionsProxy = GameActionsProxy;

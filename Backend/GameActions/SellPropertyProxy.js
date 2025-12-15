@@ -1,7 +1,7 @@
 // SellPropertyProxy.js
-export const sellPropertyProxy = async (sellerId, propertyId, ownerId = null, sellPrice = null) => {
+export const sellPropertyProxy = async (sellerId, propertyId, ownerId = null, buyerId = null, sellPrice = null) => {
     try {
-        if (ownerId !== sellerId) {
+        if (String(ownerId) !== String(sellerId)) {
             return { success: false, message: "You do not own this property" };
         }
 
@@ -9,12 +9,17 @@ export const sellPropertyProxy = async (sellerId, propertyId, ownerId = null, se
         let payload = { sellerId, propertyId };
 
         if (!sellPrice || sellPrice <= 0) {
-            // Default: sell to bank at standard price
             url = '../../Backend/GameActions/sellPropertyToBank.php';
         } else {
-            // Selling to another player (bargain/negotiation)
+            if (!buyerId) return { success: false, message: "Missing buyerId for player sale" };
+
             url = '../../Backend/GameActions/sellPropertyToPlayer.php';
-            payload.offerPrice = sellPrice;
+            payload = {
+                owner_id: sellerId,
+                buyer_id: buyerId,
+                property_id: propertyId,
+                price: sellPrice
+            };
         }
 
         const res = await fetch(url, {
