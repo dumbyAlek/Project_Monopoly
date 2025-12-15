@@ -109,7 +109,6 @@ const GameActionsProxy = (() => {
         return;
         }
 
-        // ✅ open your new modal (owner only; buyer chosen inside modal)
         const owner = { id: Number(playerId), name: getPlayerNameById(playerId) };
         window.openSellTradeModal(owner, propertyId, propertyName, tileIndex);
 

@@ -1,6 +1,8 @@
 <?php
 require_once "../../Database/Database.php";
 header('Content-Type: application/json');
+ini_set('display_errors', 0);
+error_reporting(E_ALL);
 
 // Get the JSON payload
 $input = json_decode(file_get_contents('php://input'), true);
