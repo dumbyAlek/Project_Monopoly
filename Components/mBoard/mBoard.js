@@ -131,7 +131,10 @@ export async function rollDice(mappingLabels) {
     animateDice(document.getElementById("dice1"), diceFaces[die1-1]);
     animateDice(document.getElementById("dice2"), diceFaces[die2-1]);
 
-    p.pos = (p.pos + total) % 40;
+    const oldPos = p.pos;
+    const rawPos = oldPos + total;
+    const passedGo = rawPos >= 40;     // true if crossing/landing on GO
+    p.pos = rawPos % 40;
 
     if (tiles[p.pos].category === "goToJail") {
       const jailIndex = tiles.findIndex(t => t.category === "jail");
@@ -140,6 +143,35 @@ export async function rollDice(mappingLabels) {
 
     movePlayer(p, mappingLabels);
     enableTileActions(p.pos);
+
+    // ✅ Only do GO payout if player actually passed GO
+    if (passedGo) {
+      const r = await fetch("../../Backend/GameActions/passGo.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          gameId: Number(window.currentGameId),
+          playerId: Number(p.id),
+        })
+      });
+
+      const j = await r.json();
+
+      if (j.success) {
+        const playerName =
+          window.playersData?.find(pp => Number(pp.player_id) === Number(p.id))?.player_name
+          || `Player ${p.id}`;
+
+        alert(`${playerName} passed GO, collected $${j.amount}`);
+
+        if (typeof updatePlayerMoney === "function") {
+          updatePlayerMoney(p.id, j.newBalance);
+        }
+      } else {
+        console.error("passGo failed:", j.message);
+      }
+    }
+
 
     fetch("../../Backend/GameActions/updatePlayerPosition.php", {
       method: "POST",
