@@ -86,6 +86,7 @@ export function generateTiles() {
                         <p>Rent: ${t.rent ?? "N/A"}</p>
                         <button class="buy-btn">Buy</button>
                         <button class="sell-btn">Sell</button>
+                        <button class="placeHouseOrHotel-btn">Place House/Hotel</button>
                       </div>`;
 
     // If tile has sections (like Jail)
