@@ -164,7 +164,7 @@ $properties = $dataFacade->getProperties();
         <div class="players-container">
             <?php foreach($players as $p): ?>
                 <div class="player-panel" data-player-id="<?php echo $p['player_id']; ?>">
-                    <!-- <h3><?php echo htmlspecialchars($p['player_name']); ?> <img src="../../Assets/player-icon.png" alt="icon" class="player-icon"></h3> -->
+                    <h3><?php echo htmlspecialchars($p['player_name']); ?></h3>
                     <p>Money: $<span class="money-value"><?php echo $p['money']; ?></span></p>
                     <p>Properties: <?php echo $p['number_of_properties']; ?> ($<?php echo $p['propertyWorthCash']; ?>)</p>
                     <p>Get Out of Jail Card: <?php echo $p['has_get_out_card'] ? "Yes" : "No"; ?></p>
