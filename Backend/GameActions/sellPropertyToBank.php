@@ -5,6 +5,7 @@ header('Content-Type: application/json');
 $data = json_decode(file_get_contents("php://input"), true);
 $playerId = intval($data['sellerId']);
 $propertyId = intval($data['propertyId']);
+$gameIdClient = intval($data['gameId'] ?? 0);
 
 $db = Database::getInstance()->getConnection();
 $db->begin_transaction();
@@ -20,6 +21,9 @@ try {
     if (!$player) throw new Exception("Player not found");
 
     $gameId = $player['current_game_id'];
+    if ($gameIdClient && (int)$gameIdClient !== (int)$gameId) {
+        throw new Exception("Game mismatch.");
+    }
 
     // Get property info
     $propStmt = $db->prepare("
@@ -60,15 +64,15 @@ try {
 
 
     // Add money to player
-    $updatePlayer = $db->prepare("UPDATE Player SET money = money + ? WHERE player_id = ?");
-    $updatePlayer->bind_param("ii", $sellPrice, $playerId);
+    $updatePlayer = $db->prepare("UPDATE Player SET money = money + ? WHERE player_id = ? AND current_game_id = ?");
+    $updatePlayer->bind_param("iii", $sellPrice, $playerId, $gameId);
     $updatePlayer->execute();
     if ($updatePlayer->affected_rows !== 1) throw new Exception("Failed to update player money.");
 
     // Deduct money from bank
     $bankId = (int)$bank['bank_id'];
-    $updateBank = $db->prepare("UPDATE Bank SET total_funds = total_funds - ? WHERE bank_id = ?");
-    $updateBank->bind_param("ii", $sellPrice, $bankId);
+    $updateBank = $db->prepare("UPDATE Bank SET total_funds = total_funds - ? WHERE bank_id = ? AND game_id = ?");
+    $updateBank->bind_param("iii", $sellPrice, $bankId, $gameId);
     $updateBank->execute();
     if ($updateBank->affected_rows !== 1) throw new Exception("Failed to update bank money.");
 
@@ -122,14 +126,16 @@ try {
     $logStmt->close();
 
     echo json_encode([
-        'success' => true,
-        'newBalance' => $newMoney,
-        'owned' => false,
-        'message' => 'Property sold to bank'
+    'success' => true,
+    'message' => 'Property sold to bank',
+    'sellerNewBalance' => $newMoney,
+    'buyerNewBalance' => null,
+    'newOwnerId' => null
     ]);
 
 } catch (Exception $e) {
     $db->rollback();
     echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
+exit;
 ?>
