@@ -283,6 +283,7 @@
   top: 0%;
   left: 13%;
   transform: translate(-50%, -50%);
+  cursor: pointer;
 }
 
 .community-box {
@@ -302,6 +303,7 @@
   left: 35%;
   transform: translate(-50%, -50%);
   text-align: center;
+  cursor: pointer;
 }
 
 
@@ -615,7 +617,7 @@ button:hover {
 
 .houses-container {
   position: absolute;
-  top: 20px; /* above player placeholders but below name/image */
+  bottom: 9px; /* above player placeholders but below name/image */
   display: flex;
   gap: 2px;
   justify-content: center;
