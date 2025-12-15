@@ -394,3 +394,146 @@ window.addEventListener("pagehide", () => {
 });
 
 window.openTradeModal = openTradeModal;
+
+/* ===========================
+   BUY PROPERTY MODAL
+   =========================== */
+
+const tradeModal = document.getElementById("tradeModal");
+const buyerView = document.getElementById("buyerView");
+const ownerView = document.getElementById("ownerView");
+const resultView = document.getElementById("resultView");
+
+const offerAmountInput = document.getElementById("offerAmount");
+const proceedBtn = document.getElementById("proceedBtn");
+
+let tradeState = {};
+
+function openBuyModal(buyerName, ownerName) {
+    tradeModal.style.display = "flex";
+
+    buyerView.style.display = "block";
+    ownerView.style.display = "none";
+    resultView.style.display = "none";
+
+    document.getElementById("buyerName").innerText = buyerName;
+    document.getElementById("ownerName").innerText = ownerName;
+
+    offerAmountInput.value = "";
+    proceedBtn.disabled = true;
+
+    tradeState = { buyerName, ownerName };
+}
+
+offerAmountInput.addEventListener("input", () => {
+    proceedBtn.disabled = offerAmountInput.value <= 0;
+});
+
+proceedBtn.addEventListener("click", () => {
+    buyerView.style.display = "none";
+    ownerView.style.display = "block";
+
+    document.getElementById("offeredPrice").innerText =
+        offerAmountInput.value;
+
+    tradeState.price = offerAmountInput.value;
+});
+
+document.getElementById("acceptTradeBtn").addEventListener("click", () => {
+    ownerView.style.display = "none";
+    resultView.style.display = "block";
+    document.getElementById("resultMessage").innerText =
+        "Trade successful!";
+});
+
+document.getElementById("declineTradeBtn").addEventListener("click", () => {
+    ownerView.style.display = "none";
+    resultView.style.display = "block";
+    document.getElementById("resultMessage").innerText =
+        "Trade declined.";
+});
+
+function closeTradeModal() {
+    tradeModal.style.display = "none";
+}
+
+
+/* ===========================
+   SELL PROPERTY MODAL
+   =========================== */
+
+const sellModal = document.getElementById("sellTradeModal");
+
+const sellOptionsView = document.getElementById("sellOptionsView");
+const sellToPlayerView = document.getElementById("sellToPlayerFormView");
+const buyerConfirmView = document.getElementById("buyerConfirmView");
+const sellResultView = document.getElementById("sellResultView");
+
+const askingPriceInput = document.getElementById("askingPrice");
+const buyerSelect = document.getElementById("sellBuyerSelect");
+const proceedSellBtn = document.getElementById("proceedToBuyerBtn");
+
+let sellState = {};
+
+function openSellModal(propertyName, ownerName) {
+    sellModal.style.display = "flex";
+
+    sellOptionsView.style.display = "block";
+    sellToPlayerView.style.display = "none";
+    buyerConfirmView.style.display = "none";
+    sellResultView.style.display = "none";
+
+    document.getElementById("sellPropertyLabel").innerText =
+        `Property: ${propertyName}`;
+    document.getElementById("sellerName").innerText = ownerName;
+
+    askingPriceInput.value = "";
+    buyerSelect.value = "";
+    proceedSellBtn.disabled = true;
+}
+
+document.getElementById("sellToPlayerBtn").onclick = () => {
+    sellOptionsView.style.display = "none";
+    sellToPlayerView.style.display = "block";
+};
+
+document.getElementById("backToSellOptionsBtn").onclick = () => {
+    sellToPlayerView.style.display = "none";
+    sellOptionsView.style.display = "block";
+};
+
+askingPriceInput.addEventListener("input", validateSellForm);
+buyerSelect.addEventListener("change", validateSellForm);
+
+function validateSellForm() {
+    proceedSellBtn.disabled =
+        askingPriceInput.value <= 0 || buyerSelect.value === "";
+}
+
+proceedSellBtn.onclick = () => {
+    sellToPlayerView.style.display = "none";
+    buyerConfirmView.style.display = "block";
+
+    document.getElementById("buyerConfirmName").innerText =
+        buyerSelect.options[buyerSelect.selectedIndex].text;
+    document.getElementById("finalPrice").innerText =
+        askingPriceInput.value;
+};
+
+document.getElementById("acceptSellBtn").onclick = () => {
+    buyerConfirmView.style.display = "none";
+    sellResultView.style.display = "block";
+    document.getElementById("sellResultMessage").innerText =
+        "Property sold successfully!";
+};
+
+document.getElementById("declineSellBtn").onclick = () => {
+    buyerConfirmView.style.display = "none";
+    sellResultView.style.display = "block";
+    document.getElementById("sellResultMessage").innerText =
+        "Sale declined.";
+};
+
+function closeSellTradeModal() {
+    sellModal.style.display = "none";
+}
