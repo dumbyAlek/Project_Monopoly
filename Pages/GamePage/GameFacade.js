@@ -12,27 +12,24 @@ const GameFacade = (() => {
     return { totalFunds };
   }
 
-  // ✅ helper: get a player's live board position from mBoard.js
   function getPlayerPosition(playerId) {
     const arr = window.__mPlayers || [];
     const p = arr.find(x => Number(x.id) === Number(playerId));
     return Number(p?.pos ?? 0);
   }
 
-  // ✅ helper: snapshot properties from window.tiles (requires tiles[i].id to be DB property_id)
   function getPropertiesStatus() {
-    const tiles = window.tiles || [];
-    return tiles
-      .map((t, tileIndex) => ({
-        tileIndex,
-        property_id: Number(t.id ?? 0),                // DB Property.property_id
-        owner_id: (t.owner_id === null || t.owner_id === undefined) ? null : Number(t.owner_id),
-        house_count: Number(t.house_count ?? 0),
-        hotel_count: Number(t.hotel_count ?? 0),
-        is_mortgaged: !!t.is_mortgaged
-      }))
-      .filter(p => p.property_id > 0);
+    const gp = window.gameProperties || {};
+    return Object.keys(gp).map(k => ({
+      tileIndex: Number(k),
+      property_id: Number(gp[k].id),
+      owner_id: gp[k].owner_id ?? null,
+      house_count: Number(gp[k].house_count ?? 0),
+      hotel_count: Number(gp[k].hotel_count ?? 0),
+      is_mortgaged: !!gp[k].is_mortgaged
+    })).filter(p => p.property_id > 0);
   }
+
 
   function getPlayersStatus() {
     const panels = document.querySelectorAll(".player-panel");
@@ -104,7 +101,6 @@ const GameFacade = (() => {
     }
   }
 
-  // ✅ RELIABLE unload save (fetch can get cancelled; beacon usually won't)
   function saveGameBeacon(gameId) {
     try {
       const payload = buildSavePayload(gameId);

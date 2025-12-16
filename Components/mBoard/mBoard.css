@@ -41,19 +41,19 @@
   background-color: red;
 }
 
-.3layer.p2 {
+.player.p2 {
   background-color: blue;
 }
 
-.3layer.p3 {
+.player.p3 {
   background-color: green;
 }
 
-.3layer.p4 {
+.player.p4 {
   background-color: orange;
 }
 
-/3 tiles.css */
+/* /p tiles.css */ */
 
 
 .tile-color {

@@ -62,8 +62,13 @@ try {
     if (!$bank) throw new Exception("Bank not found");
 
     // Deduct money from player
-    $updatePlayer = $db->prepare("UPDATE Player SET money = money - ? WHERE player_id = ?");
-    $updatePlayer->bind_param("ii", $price, $playerId);
+    $updatePlayer = $db->prepare(
+        "UPDATE Player 
+        SET money = money - ? 
+        WHERE player_id = ? AND current_game_id = ?"
+    );
+    $updatePlayer->bind_param("iii", $price, $playerId, $gameId);
+
     $updatePlayer->execute();
     if ($updatePlayer->affected_rows !== 1) {
         throw new Exception("Failed to update player balance.");

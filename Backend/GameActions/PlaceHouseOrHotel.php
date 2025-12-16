@@ -46,10 +46,11 @@ try {
     $stmt = $db->prepare("
         SELECT money
         FROM Player
-        WHERE player_id = ?
+        WHERE player_id = ? AND current_game_id = ?
         FOR UPDATE
     ");
-    $stmt->bind_param("i", $playerId);
+    $stmt->bind_param("ii", $playerId, $gameId);
+
     $stmt->execute();
     $player = $stmt->get_result()->fetch_assoc();
 
@@ -77,17 +78,19 @@ try {
     $stmt = $db->prepare("
         UPDATE Property
         SET house_count = ?, hotel_count = ?
-        WHERE property_id = ?
+        WHERE property_id = ? AND current_game_id = ?
     ");
-    $stmt->bind_param("iii", $houseCount, $hotelCount, $propertyId);
+    $stmt->bind_param("iiii", $houseCount, $hotelCount, $propertyId, $gameId);
+
     $stmt->execute();
 
     $stmt = $db->prepare("
         UPDATE Player
         SET money = money - ?
-        WHERE player_id = ?
+        WHERE player_id = ? AND current_game_id = ?
     ");
-    $stmt->bind_param("ii", $cost, $playerId);
+    $stmt->bind_param("iii", $cost, $playerId, $gameId);
+
     $stmt->execute();
 
     $db->commit();

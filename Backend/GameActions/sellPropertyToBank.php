@@ -12,8 +12,14 @@ $db->begin_transaction();
 
 try {
     // Get player info
-    $playerStmt = $db->prepare("SELECT money, current_game_id FROM Player WHERE player_id = ? FOR UPDATE");
-    $playerStmt->bind_param("i", $playerId);
+    $playerStmt = $db->prepare(
+        "SELECT money, current_game_id 
+        FROM Player 
+        WHERE player_id = ? AND current_game_id = ? 
+        FOR UPDATE"
+    );
+    $playerStmt->bind_param("ii", $playerId, $gameIdClient);
+
     $playerStmt->execute();
     $player = $playerStmt->get_result()->fetch_assoc();
     $playerStmt->close();
@@ -91,11 +97,12 @@ try {
     // Update wallet
     $propPrice = (int)$property['price'];
     $walletStmt = $db->prepare("
-    UPDATE Wallet
-    SET propertyWorthCash = propertyWorthCash - ?, number_of_properties = number_of_properties - 1
-    WHERE player_id = ?
+        UPDATE Wallet
+        SET propertyWorthCash = propertyWorthCash - ?, number_of_properties = number_of_properties - 1
+        WHERE player_id = ?
     ");
     $walletStmt->bind_param("ii", $propPrice, $playerId);
+
     $walletStmt->execute();
     if ($walletStmt->affected_rows !== 1) {
         throw new Exception("Wallet update failed (wallet row missing?).");

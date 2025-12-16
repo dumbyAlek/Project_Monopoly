@@ -18,7 +18,6 @@ $db = Database::getInstance()->getConnection();
 try {
     $db->begin_transaction();
 
-    /* 1️⃣ Read GO amount */
     $stmt = $db->prepare("SELECT passing_GO FROM Game WHERE game_id = ?");
     $stmt->bind_param("i", $gameId);
     $stmt->execute();
@@ -27,7 +26,6 @@ try {
 
     $amount = (int)$game['passing_GO'];
 
-    /* 2️⃣ Get bank */
     $stmt = $db->prepare("SELECT bank_id, total_funds FROM Bank WHERE game_id = ?");
     $stmt->bind_param("i", $gameId);
     $stmt->execute();
@@ -38,21 +36,21 @@ try {
         throw new Exception("Bank has insufficient funds");
     }
 
-    /* 3️⃣ Debit bank */
     $stmt = $db->prepare(
         "UPDATE Bank SET total_funds = total_funds - ? WHERE bank_id = ?"
     );
     $stmt->bind_param("ii", $amount, $bank['bank_id']);
     $stmt->execute();
 
-    /* 4️⃣ Credit player */
     $stmt = $db->prepare(
-        "UPDATE Player SET money = money + ? WHERE player_id = ?"
+        "UPDATE Player 
+        SET money = money + ? 
+        WHERE player_id = ? AND current_game_id = ?"
     );
-    $stmt->bind_param("ii", $amount, $playerId);
+    $stmt->bind_param("iii", $amount, $playerId, $gameId);
+
     $stmt->execute();
 
-    /* 5️⃣ Bank transaction record */
     $stmt = $db->prepare(
         "INSERT INTO BankTransaction
          (bank_id, player_id, property_id, type, amount, timestamp)
@@ -61,7 +59,6 @@ try {
     $stmt->bind_param("iii", $bank['bank_id'], $playerId, $amount);
     $stmt->execute();
 
-    /* 6️⃣ Game log */
     $stmt = $db->prepare(
         "INSERT INTO Log (game_id, description, timestamp)
          VALUES (?, ?, NOW())"
@@ -70,9 +67,11 @@ try {
     $stmt->bind_param("is", $gameId, $desc);
     $stmt->execute();
 
-    /* 7️⃣ Return updated balance */
-    $stmt = $db->prepare("SELECT money FROM Player WHERE player_id = ?");
-    $stmt->bind_param("i", $playerId);
+    $stmt = $db->prepare(
+        "SELECT money FROM Player WHERE player_id = ? AND current_game_id = ?"
+    );
+    $stmt->bind_param("ii", $playerId, $gameId);
+
     $stmt->execute();
     $player = $stmt->get_result()->fetch_assoc();
 

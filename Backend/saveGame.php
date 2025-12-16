@@ -45,7 +45,7 @@ try {
     $stmtPlayer = $db->prepare("
         UPDATE Player
         SET money = ?, position = ?, is_in_jail = ?, has_get_out_card = ?
-        WHERE player_id = ?
+        WHERE player_id = ? AND current_game_id = ?
     ");
 
     // Wallet
@@ -64,7 +64,16 @@ try {
         $inJail = !empty($p['is_in_jail']) ? 1 : 0;
         $hasCard = !empty($p['has_get_out_card']) ? 1 : 0;
 
-        $stmtPlayer->bind_param("iiiii", $money, $position, $inJail, $hasCard, $playerId);
+        $stmtPlayer->bind_param(
+            "iiiiii",
+            $money,
+            $position,
+            $inJail,
+            $hasCard,
+            $playerId,
+            $gameId
+        );
+
         $stmtPlayer->execute();
 
         $propCount = (int)($p['number_of_properties'] ?? 0);
@@ -72,7 +81,15 @@ try {
         $debtTo = (int)($p['debt_to_players'] ?? 0);
         $debtFrom = (int)($p['debt_from_players'] ?? 0);
 
-        $stmtWallet->bind_param("iiiii", $propCount, $propWorth, $debtTo, $debtFrom, $playerId);
+        $stmtWallet->bind_param(
+            "iiiii",
+            $propCount,
+            $propWorth,
+            $debtTo,
+            $debtFrom,
+            $playerId
+        );
+
         $stmtWallet->execute();
     }
 
