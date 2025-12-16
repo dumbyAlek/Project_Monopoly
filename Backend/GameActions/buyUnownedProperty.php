@@ -92,16 +92,25 @@ try {
     }
 
 
-    // Update wallet
-    $walletStmt = $db->prepare("
-        INSERT INTO Wallet (player_id, propertyWorthCash, number_of_properties)
-        VALUES (?, ?, 1)
-        ON DUPLICATE KEY UPDATE
-        propertyWorthCash = propertyWorthCash + VALUES(propertyWorthCash),
-        number_of_properties = number_of_properties + 1
+    // Ensure Wallet row exists (safe)
+    $st = $db->prepare("
+        INSERT IGNORE INTO Wallet (player_id, propertyWorthCash, number_of_properties, debt_to_players, debt_from_players)
+        VALUES (?, 0, 0, 0, 0)
     ");
-    $walletStmt->bind_param("ii", $playerId, $price);
+    $st->bind_param("i", $playerId);
+    $st->execute();
+    $st->close();
+
+    // Update wallet (bank purchase uses the property's listed price)
+    $walletStmt = $db->prepare("
+    UPDATE Wallet
+    SET propertyWorthCash = propertyWorthCash + ?,
+        number_of_properties = number_of_properties + 1
+    WHERE player_id = ?
+    ");
+    $walletStmt->bind_param("ii", $price, $playerId);
     $walletStmt->execute();
+    $walletStmt->close();
 
     // Log bank transaction
     $bankTransStmt = $db->prepare("
@@ -121,7 +130,7 @@ try {
     $updatePlayer->close();
     $updateBank->close();
     $updateProp->close();
-    $walletStmt->close();
+
     $bankTransStmt->close();
     $logStmt->close();
 

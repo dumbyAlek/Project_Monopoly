@@ -92,16 +92,25 @@ try {
     if ($st->affected_rows !== 1) throw new Exception("Failed to transfer property.");
     $st->close();
 
-    $propPrice = (int)$property['price'];
+    $worthDelta = (int)$price;
+
+    $st = $db->prepare("
+        INSERT IGNORE INTO Wallet (player_id, propertyWorthCash, number_of_properties, debt_to_players, debt_from_players)
+        VALUES (?, 0, 0, 0, 0), (?, 0, 0, 0, 0)
+    ");
+    $st->bind_param("ii", $owner_id, $buyer_id);
+    $st->execute();
+    $st->close();
+
 
     // Wallet updates
     $st = $db->prepare("
-        UPDATE Wallet
-        SET number_of_properties = number_of_properties - 1,
-            propertyWorthCash = propertyWorthCash - ?
-        WHERE player_id = ?
+    UPDATE Wallet
+    SET number_of_properties = GREATEST(number_of_properties - 1, 0),
+        propertyWorthCash    = GREATEST(propertyWorthCash - ?, 0)
+    WHERE player_id = ?
     ");
-    $st->bind_param("ii", $propPrice, $owner_id);
+    $st->bind_param("ii", $worthDelta, $owner_id);
     $st->execute();
     $st->close();
 
@@ -111,7 +120,7 @@ try {
             propertyWorthCash = propertyWorthCash + ?
         WHERE player_id = ?
     ");
-    $st->bind_param("ii", $propPrice, $buyer_id);
+    $st->bind_param("ii", $worthDelta, $buyer_id);
     $st->execute();
     $st->close();
 
