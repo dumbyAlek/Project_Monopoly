@@ -22,7 +22,7 @@ try {
 
   // Lock property, get owner + rent
   $propStmt = $db->prepare("
-    SELECT property_id, rent, owner_id, is_mortgaged
+    SELECT property_id, rent, owner_id, house_count, hotel_count, is_mortgaged
     FROM Property
     WHERE property_id = ? AND current_game_id = ?
     FOR UPDATE
@@ -38,7 +38,18 @@ try {
   if ((int)$prop['is_mortgaged'] === 1) throw new Exception("Property is mortgaged; no rent due");
 
   $receiverId = (int)$prop['owner_id'];
-  $amount = (int)$prop['rent'];
+  $baseRent  = (int)$prop['rent'];
+  $houseCnt = (int)$prop['house_count'];
+  $hotelCnt = (int)$prop['hotel_count'];
+
+  $amount = $baseRent + ($houseCnt * 50);
+
+  $baseRent  = (int)$prop['rent'];
+  $houseCnt = (int)$prop['house_count'];
+  $hotelCnt = (int)$prop['hotel_count'];
+
+  $amount = $baseRent + ($houseCnt * 50);
+
   if ($amount <= 0) throw new Exception("Invalid rent amount");
 
   // Lock payer
