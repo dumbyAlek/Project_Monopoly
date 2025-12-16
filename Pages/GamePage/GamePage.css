@@ -268,3 +268,99 @@ body {
 .pay-loan-btn:hover, .pay-debt-btn:hover, .ask-debt-btn:hover {
     background-color: #1976d2;
 }
+
+/* ===========================
+   MODAL BASE
+   =========================== */
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    margin: auto;
+}
+
+.modal-content {
+    background: #1e1e2f;
+    color: #fff;
+    width: 420px;
+    max-width: 90%;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    animation: scaleIn 0.25s ease;
+    margin: auto;
+    margin-top: 43px;
+    position: relative;
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+}
+
+.modal h3 {
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 20px;
+}
+
+.modal p {
+    margin: 10px 0;
+}
+
+.modal label {
+    display: block;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.modal input,
+.modal select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border-radius: 6px;
+    border: none;
+    font-size: 14px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.modal-actions button {
+    flex: 1;
+    padding: 10px;
+    font-weight: 600;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+/* Button colors */
+.modal-actions button:disabled {
+    background: #555;
+    cursor: not-allowed;
+}
+
+.modal-actions button:not(:disabled) {
+    background: linear-gradient(135deg, #4caf50, #43a047);
+    color: #fff;
+}
+
+.modal-actions button:nth-child(2) {
+    background: linear-gradient(135deg, #f44336, #d32f2f);
+}
+
+.modal-actions button:hover:not(:disabled) {
+    transform: translateY(-2px);
+}
+

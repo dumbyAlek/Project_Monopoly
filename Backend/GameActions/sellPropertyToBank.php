@@ -116,10 +116,6 @@ try {
     $walletStmt->execute();
     $walletStmt->close();
 
-    if ($walletStmt->affected_rows !== 1) {
-        throw new Exception("Wallet update failed (wallet row missing?).");
-    }
-
     // Log bank transaction
     $bankTransStmt = $db->prepare("
     INSERT INTO BankTransaction (bank_id, player_id, property_id, type, amount, timestamp)

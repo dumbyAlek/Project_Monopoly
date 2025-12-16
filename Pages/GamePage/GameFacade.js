@@ -30,7 +30,6 @@ const GameFacade = (() => {
     })).filter(p => p.property_id > 0);
   }
 
-
   function getPlayersStatus() {
     const panels = document.querySelectorAll(".player-panel");
     const players = [];

@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../Database/Database.php';
 //     header('Location: ../LoginPage/LoginPage.php');
 //     exit;
 // }
-
+// $_SESSION['username'] = $_GET['sessionId'] ?? null;
 $username = $_SESSION['username'];
 
 // Get DB connection from singleton
