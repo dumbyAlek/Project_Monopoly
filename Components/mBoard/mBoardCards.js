@@ -1,17 +1,19 @@
 // ===== CARD LOGIC JS =====
+let pendingCardAction = null;
+
 
 // ------- Community Chest Cards -------
 export const communityChestCards = [
-    { text: "DOCTOR'S FEE<br>PAY 50 Taka", action: "pay", amount: 50 },
-    { text: "BANK ERROR IN YOUR FAVOR<br>COLLECT 200 Taka", action: "collect", amount: 200 },
-    { text: "PAY SCHOOL FEES<br>PAY 150 Taka", action: "pay", amount: 150 },
-    { text: "FROM SALE OF STOCK<br>YOU GET 45 Taka", action: "collect", amount: 45 },
+    { text: "DOCTOR'S FEE<br>PAY $50", action: "pay", amount: 50 },
+    { text: "BANK ERROR IN YOUR FAVOR<br>COLLECT $200", action: "collect", amount: 200 },
+    { text: "PAY SCHOOL FEES<br>PAY $150", action: "pay", amount: 150 },
+    { text: "FROM SALE OF STOCK<br>YOU GET $45", action: "collect", amount: 45 },
     { text: "HOLIDAY FUND MATURES<br>RECEIVE 100 Taka", action: "collect", amount: 100 },
     { text: "INCOME TAX REFUND<br>COLLECT 20 Taka", action: "collect", amount: 20 },
     { text: "LIFE INSURANCE MATURES<br>COLLECT 100 Taka", action: "collect", amount: 100 },
-    { text: "PAY HOSPITAL FEES<br>PAY 100 Taka", action: "pay", amount: 100 },
+    { text: "PAY HOSPITAL FEES<br>PAY $100", action: "pay", amount: 100 },
     { text: "GET OUT OF JAIL FREE<br>Keep this card", action: "jail_free", amount: 0 },
-    { text: "YOU INHERIT 100 Taka<br>COLLECT 100 Taka", action: "collect", amount: 100 }
+    { text: "YOU INHERIT $100<br>COLLECT $100", action: "collect", amount: 100 }
 ];
 
 // ------- Chance Cards -------
@@ -57,12 +59,19 @@ function displayCard(type, title, cardData) {
 
     modal.classList.add('active');
 
-    applyCardAction(cardData);
+    pendingCardAction = cardData;
 }
 
 export function closeCard() {
-    document.getElementById('cardModal').classList.remove('active');
+  document.getElementById('cardModal').classList.remove('active');
+
+  if (pendingCardAction) {
+    // fire and forget; or await if you want
+    window.__applyPickedCard?.(pendingCardAction);
+    pendingCardAction = null;
+  }
 }
+
 
 function applyCardAction(cardData) {
     console.log('Card Action:', cardData.action, 'Amount:', cardData.amount);

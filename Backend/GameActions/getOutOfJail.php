@@ -1,65 +1,141 @@
 <?php
 session_start();
-require_once "../../Database/Database.php";
+require_once __DIR__ . "/../../Database/Database.php";
 
 header('Content-Type: application/json');
 
-if (!isset($_SESSION['user_id'])) {
-    echo json_encode(['success' => false, 'message' => 'User not logged in']);
-    exit;
-}
-
-$user_id = intval($_SESSION['user_id']);
-$player_id = isset($_POST['player_id']) ? intval($_POST['player_id']) : null;
-$useCard = isset($_POST['use_card']) ? boolval($_POST['use_card']) : false;
-
-if (!$player_id) {
-    echo json_encode(['success' => false, 'message' => 'Player ID missing']);
-    exit;
-}
-
 $db = Database::getInstance()->getConnection();
-if (!$db) {
-    echo json_encode(['success' => false, 'message' => 'DB connection failed']);
+
+// read JSON or POST
+$input = json_decode(file_get_contents("php://input"), true);
+if (!is_array($input)) $input = $_POST;
+
+$playerId = isset($input['playerId']) ? (int)$input['playerId'] : (isset($input['player_id']) ? (int)$input['player_id'] : 0);
+$useCard  = isset($input['useCard']) ? (bool)$input['useCard'] : (isset($input['use_card']) ? (bool)$input['use_card'] : false);
+$gameId   = isset($input['gameId']) ? (int)$input['gameId'] : (isset($input['game_id']) ? (int)$input['game_id'] : 0);
+
+if ($playerId <= 0) {
+    echo json_encode(['success' => false, 'message' => 'playerId missing']);
     exit;
 }
 
-// Fetch player info
-$stmt = $db->prepare("SELECT is_in_jail, has_get_out_card, money, current_game_id FROM Player WHERE player_id = ?");
-$stmt->execute([$player_id]);
-$player = $stmt->fetch(PDO::FETCH_ASSOC);
+try {
+    $db->begin_transaction();
 
-if (!$player) {
-    echo json_encode(['success' => false, 'message' => 'Player not found']);
-    exit;
-}
+    // Lock player
+    $pStmt = $db->prepare("
+        SELECT player_id, money, is_in_jail, has_get_out_card, current_game_id
+        FROM Player
+        WHERE player_id = ?
+        FOR UPDATE
+    ");
+    $pStmt->bind_param("i", $playerId);
+    $pStmt->execute();
+    $player = $pStmt->get_result()->fetch_assoc();
+    $pStmt->close();
 
-if (!$player['is_in_jail']) {
-    echo json_encode(['success' => false, 'message' => 'Player is not in jail']);
-    exit;
-}
+    if (!$player) throw new Exception("Player not found");
+    if ((int)$player['is_in_jail'] !== 1) throw new Exception("Player is not in jail");
 
-// Fetch passing_GO amount from the game
-$stmt = $db->prepare("SELECT passing_GO FROM Game WHERE game_id = ?");
-$stmt->execute([$player['current_game_id']]);
-$game = $stmt->fetch(PDO::FETCH_ASSOC);
-$fine = $game ? intval($game['passing_GO']) : 50; // default to 50 if not found
+    $effectiveGameId = $gameId > 0 ? $gameId : (int)$player['current_game_id'];
+    if ($effectiveGameId <= 0) throw new Exception("Game not found for player");
 
-$updated = false;
+    // Fine = Game.passing_GO (your earlier logic). Fallback 50.
+    $gStmt = $db->prepare("SELECT passing_GO FROM Game WHERE game_id = ?");
+    $gStmt->bind_param("i", $effectiveGameId);
+    $gStmt->execute();
+    $game = $gStmt->get_result()->fetch_assoc();
+    $gStmt->close();
 
-if ($useCard && $player['has_get_out_card']) {
-    $stmt = $db->prepare("UPDATE Player SET is_in_jail = 0, has_get_out_card = 0 WHERE player_id = ?");
-    $updated = $stmt->execute([$player_id]);
-} elseif (!$useCard && $player['money'] >= $fine) {
-    $stmt = $db->prepare("UPDATE Player SET is_in_jail = 0, money = money - ? WHERE player_id = ?");
-    $updated = $stmt->execute([$fine, $player_id]);
-} else {
-    echo json_encode(['success' => false, 'message' => 'Not enough funds or no Get Out of Jail card']);
-    exit;
-}
+    $fine = $game ? (int)$game['passing_GO'] : 50;
+    if ($fine <= 0) $fine = 50;
 
-if ($updated) {
-    echo json_encode(['success' => true, 'message' => 'Player released from jail', 'fine_paid' => !$useCard ? $fine : 0]);
-} else {
-    echo json_encode(['success' => false, 'message' => 'Update failed']);
+    // If using card
+    if ($useCard) {
+        if ((int)$player['has_get_out_card'] !== 1) {
+            throw new Exception("No Get Out of Jail card available");
+        }
+
+        $uStmt = $db->prepare("
+            UPDATE Player
+            SET is_in_jail = 0, has_get_out_card = 0
+            WHERE player_id = ?
+        ");
+        $uStmt->bind_param("i", $playerId);
+        $uStmt->execute();
+        $uStmt->close();
+
+        $logTxt = "Player {$playerId} used Get Out of Jail card.";
+        $lStmt = $db->prepare("INSERT INTO Log (game_id, description, timestamp) VALUES (?, ?, NOW())");
+        $lStmt->bind_param("is", $effectiveGameId, $logTxt);
+        $lStmt->execute();
+        $lStmt->close();
+
+        $db->commit();
+        echo json_encode(['success' => true, 'message' => 'Released using card', 'fine_paid' => 0]);
+        exit;
+    }
+
+    // else pay fine
+    if ((int)$player['money'] < $fine) {
+        throw new Exception("Not enough money to pay fine");
+    }
+
+    // Lock bank row for game
+    $bStmt = $db->prepare("SELECT bank_id, total_funds FROM Bank WHERE game_id = ? FOR UPDATE");
+    $bStmt->bind_param("i", $effectiveGameId);
+    $bStmt->execute();
+    $bank = $bStmt->get_result()->fetch_assoc();
+    $bStmt->close();
+
+    if (!$bank) throw new Exception("Bank not found for game");
+
+    // Update player
+    $uP = $db->prepare("UPDATE Player SET is_in_jail = 0, money = money - ? WHERE player_id = ?");
+    $uP->bind_param("ii", $fine, $playerId);
+    $uP->execute();
+    $uP->close();
+
+    // Update bank
+    $uB = $db->prepare("UPDATE Bank SET total_funds = total_funds + ? WHERE bank_id = ?");
+    $uB->bind_param("ii", $fine, $bank['bank_id']);
+    $uB->execute();
+    $uB->close();
+
+    // Record bank transaction (type enum limited; use 'loan' as generic cashflow)
+    $tType = "loan";
+    $nullProp = null;
+    $bt = $db->prepare("
+        INSERT INTO BankTransaction (bank_id, player_id, property_id, type, amount, timestamp)
+        VALUES (?, ?, ?, ?, ?, NOW())
+    ");
+    $bt->bind_param("iiisi", $bank['bank_id'], $playerId, $nullProp, $tType, $fine);
+    $bt->execute();
+    $bt->close();
+
+    // Log
+    $logTxt = "Player {$playerId} paid jail fine {$fine} to bank.";
+    $lStmt = $db->prepare("INSERT INTO Log (game_id, description, timestamp) VALUES (?, ?, NOW())");
+    $lStmt->bind_param("is", $effectiveGameId, $logTxt);
+    $lStmt->execute();
+    $lStmt->close();
+
+    // fetch new money
+    $mStmt = $db->prepare("SELECT money FROM Player WHERE player_id = ?");
+    $mStmt->bind_param("i", $playerId);
+    $mStmt->execute();
+    $newMoney = $mStmt->get_result()->fetch_assoc();
+    $mStmt->close();
+
+    $db->commit();
+
+    echo json_encode([
+        'success' => true,
+        'message' => 'Released after paying fine',
+        'fine_paid' => $fine,
+        'newBalance' => (int)($newMoney['money'] ?? 0)
+    ]);
+} catch (Exception $e) {
+    $db->rollback();
+    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
