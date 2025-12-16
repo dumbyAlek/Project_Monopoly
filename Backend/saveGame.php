@@ -45,7 +45,7 @@ try {
     $stmtPlayer = $db->prepare("
         UPDATE Player
         SET money = ?, position = ?, is_in_jail = ?, has_get_out_card = ?
-        WHERE player_id = ?
+        WHERE player_id = ? AND current_game_id = ?
     ");
 
     // Wallet
@@ -54,6 +54,20 @@ try {
         SET number_of_properties = ?, propertyWorthCash = ?, debt_to_players = ?, debt_from_players = ?
         WHERE player_id = ?
     ");
+
+    $stmtWalletEnsure = $db->prepare("
+    INSERT IGNORE INTO Wallet (player_id, propertyWorthCash, number_of_properties, debt_to_players, debt_from_players)
+    VALUES (?, 0, 0, 0, 0)
+    ");
+
+    $stmtCalcWallet = $db->prepare("
+        SELECT
+            COUNT(*) AS cnt,
+            COALESCE(SUM(price + house_count*50 + hotel_count*50), 0) AS worth
+        FROM Property
+        WHERE owner_id = ? AND current_game_id = ?
+    ");
+
 
     foreach ($players as $p) {
         $playerId = (int)($p['player_id'] ?? 0);
@@ -64,17 +78,46 @@ try {
         $inJail = !empty($p['is_in_jail']) ? 1 : 0;
         $hasCard = !empty($p['has_get_out_card']) ? 1 : 0;
 
-        $stmtPlayer->bind_param("iiiii", $money, $position, $inJail, $hasCard, $playerId);
+        $stmtPlayer->bind_param(
+            "iiiiii",
+            $money,
+            $position,
+            $inJail,
+            $hasCard,
+            $playerId,
+            $gameId
+        );
+
         $stmtPlayer->execute();
 
         $propCount = (int)($p['number_of_properties'] ?? 0);
         $propWorth = (int)($p['propertyWorthCash'] ?? 0);
         $debtTo = (int)($p['debt_to_players'] ?? 0);
         $debtFrom = (int)($p['debt_from_players'] ?? 0);
+        $stmtWalletEnsure->bind_param("i", $playerId);
+        $stmtWalletEnsure->execute();
 
-        $stmtWallet->bind_param("iiiii", $propCount, $propWorth, $debtTo, $debtFrom, $playerId);
+        $stmtCalcWallet->bind_param("ii", $playerId, $gameId);
+        $stmtCalcWallet->execute();
+        $calc = $stmtCalcWallet->get_result()->fetch_assoc();
+
+        $propCount = (int)$calc['cnt'];
+        $propWorth = (int)$calc['worth'];
+
+        $stmtWallet->bind_param(
+            "iiiii",
+            $propCount,
+            $propWorth,
+            $debtTo,
+            $debtFrom,
+            $playerId
+        );
+
         $stmtWallet->execute();
     }
+
+    $stmtWalletEnsure->close();
+    $stmtCalcWallet->close();
 
     // Properties
     if (is_array($properties)) {

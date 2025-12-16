@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../Database/Database.php';
 //     header('Location: ../LoginPage/LoginPage.php');
 //     exit;
 // }
-
+// $_SESSION['username'] = $_GET['sessionId'] ?? null;
 $username = $_SESSION['username'];
 
 // Get DB connection from singleton
@@ -82,8 +82,8 @@ if ($player_id !== null) {
         <?php if ($lastSave): ?>
           <form method="get" action="../LoadGame/LoadGame.php" style="margin:0;">
             <input type="hidden" name="game_id" value="<?= (int)$lastSave['game_id'] ?>">
-            <button type="submit" class="btn" id="resumeBtn">Continue Last Saved Game</button>
-            <div class="meta small">Last saved: <?= htmlspecialchars($lastSave['saved_time']) ?> — status: <?= htmlspecialchars($lastSave['status']) ?></div>
+            <!-- <button type="submit" class="btn" id="resumeBtn">Continue Last Saved Game</button> -->
+            <!-- <div class="meta small">Last saved: <?= htmlspecialchars($lastSave['saved_time']) ?> — status: <?= htmlspecialchars($lastSave['status']) ?></div> -->
           </form>
         <?php else: ?>
         <?php endif; ?>

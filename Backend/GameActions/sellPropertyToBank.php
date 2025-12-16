@@ -12,8 +12,14 @@ $db->begin_transaction();
 
 try {
     // Get player info
-    $playerStmt = $db->prepare("SELECT money, current_game_id FROM Player WHERE player_id = ? FOR UPDATE");
-    $playerStmt->bind_param("i", $playerId);
+    $playerStmt = $db->prepare(
+        "SELECT money, current_game_id 
+        FROM Player 
+        WHERE player_id = ? AND current_game_id = ? 
+        FOR UPDATE"
+    );
+    $playerStmt->bind_param("ii", $playerId, $gameIdClient);
+
     $playerStmt->execute();
     $player = $playerStmt->get_result()->fetch_assoc();
     $playerStmt->close();
@@ -88,18 +94,27 @@ try {
         throw new Exception("Failed to clear property owner (wrong game_id or already updated).");
     }
 
+    $st = $db->prepare("
+    INSERT IGNORE INTO Wallet (player_id, propertyWorthCash, number_of_properties, debt_to_players, debt_from_players)
+    VALUES (?, 0, 0, 0, 0)
+    ");
+    $st->bind_param("i", $playerId);
+    $st->execute();
+    $st->close();
+
+
     // Update wallet
-    $propPrice = (int)$property['price'];
+    $worthDelta = (int)$sellPrice;
+
     $walletStmt = $db->prepare("
     UPDATE Wallet
-    SET propertyWorthCash = propertyWorthCash - ?, number_of_properties = number_of_properties - 1
+    SET propertyWorthCash     = GREATEST(propertyWorthCash - ?, 0),
+        number_of_properties  = GREATEST(number_of_properties - 1, 0)
     WHERE player_id = ?
     ");
-    $walletStmt->bind_param("ii", $propPrice, $playerId);
+    $walletStmt->bind_param("ii", $worthDelta, $playerId);
     $walletStmt->execute();
-    if ($walletStmt->affected_rows !== 1) {
-        throw new Exception("Wallet update failed (wallet row missing?).");
-    }
+    $walletStmt->close();
 
     // Log bank transaction
     $bankTransStmt = $db->prepare("
@@ -121,7 +136,6 @@ try {
     $updatePlayer->close();
     $updateBank->close();
     $updateProp->close();
-    $walletStmt->close();
     $bankTransStmt->close();
     $logStmt->close();
 

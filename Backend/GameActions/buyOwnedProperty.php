@@ -56,13 +56,21 @@ try {
     // $st->close();
 
     // Money transfer
-    $st = $db->prepare("UPDATE Player SET money = money - ? WHERE player_id = ?");
-    $st->bind_param("ii", $offer, $buyer_id);
+    $st = $db->prepare(
+        "UPDATE Player 
+        SET money = money - ? 
+        WHERE player_id = ? AND current_game_id = ?"
+    );
+    $st->bind_param("iii", $offer, $buyer_id, $gameId);
     $st->execute();
     $st->close();
 
-    $st = $db->prepare("UPDATE Player SET money = money + ? WHERE player_id = ?");
-    $st->bind_param("ii", $offer, $owner_id);
+    $st = $db->prepare(
+        "UPDATE Player 
+        SET money = money + ? 
+        WHERE player_id = ? AND current_game_id = ?"
+    );
+    $st->bind_param("iii", $offer, $owner_id, $gameId);
     $st->execute();
     $st->close();
 
@@ -73,7 +81,17 @@ try {
     if ($st->affected_rows !== 1) throw new Exception("Failed to transfer property.");
     $st->close();
 
-    $price = (int)$property['price'];
+    $price = (int)$offer; 
+
+    // Ensure Wallet rows exist
+    $st = $db->prepare("
+    INSERT IGNORE INTO Wallet (player_id, propertyWorthCash, number_of_properties, debt_to_players, debt_from_players)
+    VALUES (?, 0, 0, 0, 0), (?, 0, 0, 0, 0)
+    ");
+    $st->bind_param("ii", $buyer_id, $owner_id);
+    $st->execute();
+    $st->close();
+
 
     // Wallet update
     $st = $db->prepare("
@@ -87,14 +105,15 @@ try {
     $st->close();
 
     $st = $db->prepare("
-        UPDATE Wallet
-        SET number_of_properties = number_of_properties - 1,
-            propertyWorthCash = propertyWorthCash - ?
-        WHERE player_id = ?
+    UPDATE Wallet
+    SET number_of_properties = GREATEST(number_of_properties - 1, 0),
+        propertyWorthCash = GREATEST(propertyWorthCash - ?, 0)
+    WHERE player_id = ?
     ");
     $st->bind_param("ii", $price, $owner_id);
     $st->execute();
     $st->close();
+
 
     // Personal transaction
     $st = $db->prepare("
