@@ -2,7 +2,6 @@
 session_start();
 require_once __DIR__ . '/../../Database/Database.php';
 
-// Redirect if not logged in
 if (!isset($_SESSION['username'])) {
     header('Location: ../LoginPage/LoginPage.php');
     exit;
@@ -25,14 +24,10 @@ $res = $stmt->get_result();
 $isAdmin = $res->num_rows > 0;
 $stmt->close();
 
-// =======================
-// Strategy Pattern Setup
-// =======================
 interface UserAction {
     public function execute();
 }
 
-// Change Username Action
 class ChangeUsername implements UserAction {
     private $con;
     private $currentUser;
@@ -60,7 +55,6 @@ class ChangeUsername implements UserAction {
     }
 }
 
-// Change Password Action
 class ChangePassword implements UserAction {
     private $con;
     private $currentUser;
@@ -99,12 +93,11 @@ class ChangePassword implements UserAction {
     }
 }
 
-// Backup Database Action (Admin)
 class BackupDatabase implements UserAction {
     public $message = '';
     public function execute() {
         $backupFile = __DIR__ . "/backup_monopoly_" . date('Ymd_His') . ".sql";
-        $command = "mysqldump -u root -p'yourPassword' monopoly > $backupFile"; // change password
+        $command = "mysqldump -u rahiq -p'yourPassword' monopoly > $backupFile"; // change password
         exec($command, $output, $returnVar);
         if ($returnVar === 0) {
             $this->message = "Database backup created: " . basename($backupFile);
@@ -114,7 +107,6 @@ class BackupDatabase implements UserAction {
     }
 }
 
-// Import Database Action (Admin)
 class ImportDatabase implements UserAction {
     private $filePath;
     public $message = '';
@@ -136,7 +128,6 @@ class ImportDatabase implements UserAction {
     }
 }
 
-// Delete User Action
 class DeleteUser implements UserAction {
     private $con;
     private $currentUser;
@@ -159,7 +150,6 @@ class DeleteUser implements UserAction {
     }
 }
 
-// Context to execute actions
 class ActionContext {
     private UserAction $action;
     public function setAction(UserAction $action) { $this->action = $action; }
@@ -169,9 +159,6 @@ class ActionContext {
 $message = '';
 $importFilePath = '';
 
-// =======================
-// Handle POST
-// =======================
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $context = new ActionContext();

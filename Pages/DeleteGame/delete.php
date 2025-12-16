@@ -1,12 +1,10 @@
 <?php
 require_once "../../Database/Database.php";
 
-// Strategy Interface
 interface GameAction {
     public function execute(int $game_id, int $user_id = null);
 }
 
-// Manual Delete Strategy
 class DeleteGameStrategy implements GameAction {
     private $db;
     public function __construct($db) {
@@ -86,7 +84,6 @@ class DeleteGameStrategy implements GameAction {
     }
 }
 
-// Context
 class GameContext {
     private GameAction $strategy;
 

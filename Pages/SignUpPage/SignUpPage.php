@@ -18,7 +18,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $db = Database::getInstance();
         $con = $db->getConnection();
 
-        // Check username exists in the same table used by login (User)
         $stmt = $con->prepare("SELECT user_id FROM User WHERE username = ?");
         if ($stmt) {
             $stmt->bind_param("s", $uname);
@@ -27,19 +26,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($stmt->num_rows > 0) {
                 $message = "Username already exists.";
             } else {
-                // Ready to insert into User table
                 $hash = password_hash($pwd, PASSWORD_DEFAULT);
-                $created = date('Y-m-d'); // user_created DATE column
-                $useremail = ''; // no email field in form; keep empty string (or change if you add an email input)
+                $created = date('Y-m-d');
+                $useremail = '';
 
                 $ins = $con->prepare("INSERT INTO User (username, useremail, password, user_created) VALUES (?, ?, ?, ?)");
                 if ($ins) {
                     $ins->bind_param("ssss", $uname, $useremail, $hash, $created);
                     if ($ins->execute()) {
-                        // Set session the same way login does
                         setUserSession($uname);
 
-                        // Redirect to homepage
                         header('Location: ../HomePage/HomePage.php');
                         exit;
                     } else {

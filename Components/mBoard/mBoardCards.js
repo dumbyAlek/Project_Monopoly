@@ -47,7 +47,7 @@ function displayCard(type, title, cardData) {
 
     const iconHtml = (type === 'community-chest')
         ? '<div class="card-icon"><img src="../../Assets/chest.webp" alt="Chest"></div>'
-        : '<div class="card-icon"><img src="../../Assets/quest.webp" alt="Chance"></div>';
+        : '<div class="card-icon"><img src="../../Assets/ques.webp" alt="Chance"></div>';
 
     content.className = `card-modal ${type}`;
     content.innerHTML = `
