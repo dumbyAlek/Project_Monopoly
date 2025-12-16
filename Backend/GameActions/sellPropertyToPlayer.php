@@ -9,19 +9,23 @@ $owner_id   = (int)$data['owner_id'];
 $buyer_id   = (int)$data['buyer_id'];
 $property_id = (int)$data['property_id'];
 $price      = (int)$data['price'];
-if ($buyer_id === $owner_id) {
-    throw new Exception("Buyer cannot be the seller.");
-}
-
 
 try {
+    if ($buyer_id === $owner_id) {
+        throw new Exception("Buyer cannot be the seller.");
+    }
     $db->begin_transaction();
 
     $gameIdClient = (int)($data['gameId'] ?? 0);
 
     // Lock buyer
-    $buyerStmt = $db->prepare("SELECT money, current_game_id FROM Player WHERE player_id = ? FOR UPDATE");
-    $buyerStmt->bind_param("i", $buyer_id);
+    $buyerStmt = $db->prepare(
+        "SELECT money, current_game_id 
+        FROM Player 
+        WHERE player_id = ? AND current_game_id = ? 
+        FOR UPDATE"
+    );
+    $buyerStmt->bind_param("ii", $buyer_id, $gameIdClient);
     $buyerStmt->execute();
     $buyerRow = $buyerStmt->get_result()->fetch_assoc();
     $buyerStmt->close();
@@ -35,8 +39,13 @@ try {
     }
 
     // Lock seller
-    $sellerStmt = $db->prepare("SELECT money, current_game_id FROM Player WHERE player_id = ? FOR UPDATE");
-    $sellerStmt->bind_param("i", $owner_id);
+    $sellerStmt = $db->prepare(
+        "SELECT money, current_game_id 
+        FROM Player 
+        WHERE player_id = ? AND current_game_id = ? 
+        FOR UPDATE"
+    );
+    $sellerStmt->bind_param("ii", $owner_id, $gameId);
     $sellerStmt->execute();
     $sellerRow = $sellerStmt->get_result()->fetch_assoc();
     $sellerStmt->close();

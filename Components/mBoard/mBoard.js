@@ -176,7 +176,7 @@ export async function rollDice(mappingLabels) {
     fetch("../../Backend/GameActions/updatePlayerPosition.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ playerId: p.id, position: p.pos })
+      body: JSON.stringify({ playerId: p.id, position: p.pos, gameId: Number(window.currentGameId) })
     }).catch(console.error);
 
     diceResult.textContent = `Player ${p.id} rolled ${die1} + ${die2} = ${total}`;
@@ -271,6 +271,11 @@ tiles.forEach((t, i) => {
 
       meta.house_count = result.house_count;
       meta.hotel_count = result.hotel_count;
+      if (window.tiles?.[i]) {
+        window.tiles[i].house_count = result.house_count;
+        window.tiles[i].hotel_count = result.hotel_count;
+      }
+
 
       updateHouses(i, result.house_count, result.hotel_count > 0);
 

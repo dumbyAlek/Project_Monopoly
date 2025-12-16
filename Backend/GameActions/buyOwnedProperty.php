@@ -56,13 +56,21 @@ try {
     // $st->close();
 
     // Money transfer
-    $st = $db->prepare("UPDATE Player SET money = money - ? WHERE player_id = ?");
-    $st->bind_param("ii", $offer, $buyer_id);
+    $st = $db->prepare(
+        "UPDATE Player 
+        SET money = money - ? 
+        WHERE player_id = ? AND current_game_id = ?"
+    );
+    $st->bind_param("iii", $offer, $buyer_id, $gameId);
     $st->execute();
     $st->close();
 
-    $st = $db->prepare("UPDATE Player SET money = money + ? WHERE player_id = ?");
-    $st->bind_param("ii", $offer, $owner_id);
+    $st = $db->prepare(
+        "UPDATE Player 
+        SET money = money + ? 
+        WHERE player_id = ? AND current_game_id = ?"
+    );
+    $st->bind_param("iii", $offer, $owner_id, $gameId);
     $st->execute();
     $st->close();
 

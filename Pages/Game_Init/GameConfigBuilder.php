@@ -1,4 +1,3 @@
-<!-- GameConfigBuilder.php -->
 <?php
 require_once 'GamePlayer.php';
 require_once 'GameConfig.php';

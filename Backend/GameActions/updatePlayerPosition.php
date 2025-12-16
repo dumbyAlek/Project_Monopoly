@@ -13,8 +13,13 @@ $pos = (int)$data['position'];
 
 $db = Database::getInstance()->getConnection();
 
-$stmt = $db->prepare("UPDATE Player SET position = ? WHERE player_id = ?");
-$stmt->bind_param("ii", $pos, $playerId);
+$stmt = $db->prepare("
+    UPDATE Player 
+    SET position = ? 
+    WHERE player_id = ? AND current_game_id = ?
+");
+$stmt->bind_param("iii", $pos, $playerId, $data['gameId']);
+
 $stmt->execute();
 
 echo json_encode(["success"=>true]);

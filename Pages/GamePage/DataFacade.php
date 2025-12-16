@@ -73,7 +73,7 @@ class DataFacade {
 
     public function getProperties(): array {
         $stmt = $this->db->prepare("
-            SELECT property_id, price, rent, owner_id
+            SELECT property_id, price, rent, owner_id, house_count, hotel_count, is_mortgaged
             FROM Property
             WHERE current_game_id = ?
             ORDER BY property_id ASC
@@ -94,11 +94,15 @@ class DataFacade {
             $tileIndex = $tileOrder[$i];
 
             $tiles[$tileIndex] = [
-                'id'       => (int)$prop['property_id'],
-                'price'    => (int)$prop['price'],
-                'rent'     => (int)$prop['rent'],
-                'owner_id' => $prop['owner_id'] !== null ? (int)$prop['owner_id'] : null
+            'id'          => (int)$prop['property_id'],
+            'price'       => (int)$prop['price'],
+            'rent'        => (int)$prop['rent'],
+            'owner_id'    => $prop['owner_id'] !== null ? (int)$prop['owner_id'] : null,
+            'house_count' => (int)$prop['house_count'],
+            'hotel_count' => (int)$prop['hotel_count'],
+            'is_mortgaged'=> (bool)$prop['is_mortgaged'],
             ];
+
         }
 
         return $tiles;
