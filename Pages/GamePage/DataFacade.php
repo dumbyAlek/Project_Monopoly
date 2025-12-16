@@ -25,10 +25,10 @@ class DataFacade {
                 p.position,
                 p.is_in_jail, 
                 p.has_get_out_card, 
-                w.propertyWorthCash, 
-                w.number_of_properties, 
-                w.debt_to_players, 
-                w.debt_from_players
+                COALESCE(w.propertyWorthCash, 0)    AS propertyWorthCash,
+                COALESCE(w.number_of_properties, 0) AS number_of_properties,
+                COALESCE(w.debt_to_players, 0)      AS debt_to_players,
+                COALESCE(w.debt_from_players, 0)    AS debt_from_players
             FROM Player p
             LEFT JOIN Wallet w ON p.player_id = w.player_id
             WHERE p.current_game_id = ?

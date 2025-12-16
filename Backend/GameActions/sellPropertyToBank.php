@@ -94,16 +94,28 @@ try {
         throw new Exception("Failed to clear property owner (wrong game_id or already updated).");
     }
 
-    // Update wallet
-    $propPrice = (int)$property['price'];
-    $walletStmt = $db->prepare("
-        UPDATE Wallet
-        SET propertyWorthCash = propertyWorthCash - ?, number_of_properties = number_of_properties - 1
-        WHERE player_id = ?
+    $st = $db->prepare("
+    INSERT IGNORE INTO Wallet (player_id, propertyWorthCash, number_of_properties, debt_to_players, debt_from_players)
+    VALUES (?, 0, 0, 0, 0)
     ");
-    $walletStmt->bind_param("ii", $propPrice, $playerId);
+    $st->bind_param("i", $playerId);
+    $st->execute();
+    $st->close();
 
+
+    // Update wallet
+    $worthDelta = (int)$sellPrice;
+
+    $walletStmt = $db->prepare("
+    UPDATE Wallet
+    SET propertyWorthCash     = GREATEST(propertyWorthCash - ?, 0),
+        number_of_properties  = GREATEST(number_of_properties - 1, 0)
+    WHERE player_id = ?
+    ");
+    $walletStmt->bind_param("ii", $worthDelta, $playerId);
     $walletStmt->execute();
+    $walletStmt->close();
+
     if ($walletStmt->affected_rows !== 1) {
         throw new Exception("Wallet update failed (wallet row missing?).");
     }
@@ -128,7 +140,6 @@ try {
     $updatePlayer->close();
     $updateBank->close();
     $updateProp->close();
-    $walletStmt->close();
     $bankTransStmt->close();
     $logStmt->close();
 

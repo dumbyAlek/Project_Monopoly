@@ -55,6 +55,20 @@ try {
         WHERE player_id = ?
     ");
 
+    $stmtWalletEnsure = $db->prepare("
+    INSERT IGNORE INTO Wallet (player_id, propertyWorthCash, number_of_properties, debt_to_players, debt_from_players)
+    VALUES (?, 0, 0, 0, 0)
+    ");
+
+    $stmtCalcWallet = $db->prepare("
+        SELECT
+            COUNT(*) AS cnt,
+            COALESCE(SUM(price + house_count*50 + hotel_count*50), 0) AS worth
+        FROM Property
+        WHERE owner_id = ? AND current_game_id = ?
+    ");
+
+
     foreach ($players as $p) {
         $playerId = (int)($p['player_id'] ?? 0);
         if ($playerId <= 0) continue;
@@ -80,6 +94,15 @@ try {
         $propWorth = (int)($p['propertyWorthCash'] ?? 0);
         $debtTo = (int)($p['debt_to_players'] ?? 0);
         $debtFrom = (int)($p['debt_from_players'] ?? 0);
+        $stmtWalletEnsure->bind_param("i", $playerId);
+        $stmtWalletEnsure->execute();
+
+        $stmtCalcWallet->bind_param("ii", $playerId, $gameId);
+        $stmtCalcWallet->execute();
+        $calc = $stmtCalcWallet->get_result()->fetch_assoc();
+
+        $propCount = (int)$calc['cnt'];
+        $propWorth = (int)$calc['worth'];
 
         $stmtWallet->bind_param(
             "iiiii",
@@ -92,6 +115,9 @@ try {
 
         $stmtWallet->execute();
     }
+
+    $stmtWalletEnsure->close();
+    $stmtCalcWallet->close();
 
     // Properties
     if (is_array($properties)) {
