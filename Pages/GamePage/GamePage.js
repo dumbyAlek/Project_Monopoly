@@ -472,3 +472,32 @@ document.getElementById("declineSellBtn").onclick = () => {
 function closeSellTradeModal() {
     sellModal.style.display = "none";
 }
+
+async function endGameNow() {
+  const res = await fetch("../../Backend/GameActions/GameOver.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ gameId: Number(window.currentGameId) })
+  });
+
+  const j = await res.json();
+  if (!j.success) return alert(j.message || "Failed to end game");
+
+  const lines = (j.leaderboard || []).map(x =>
+    `${x.rank}) ${x.player_name} | money=${x.money}, worth=${x.propertyWorthCash}, total=${x.assets}`
+  ).join("\n");
+
+  alert("GAME OVER!\n\nLEADERBOARD:\n" + lines);
+
+  // Freeze gameplay
+  turnLocked = true;
+  tileResolved = false;
+  enableTileActions(-1);
+  rollBtn?.classList.add("hidden");
+  endTurnBtn?.classList.add("hidden");
+  endGameBtn?.classList.add("hidden");
+}
+
+if (endGameBtn) {
+  endGameBtn.addEventListener("click", endGameNow);
+}
